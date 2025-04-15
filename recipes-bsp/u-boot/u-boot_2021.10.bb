@@ -1,13 +1,55 @@
 DESCRIPTION = "U-boot for the RZ/V2H based board"
 
-require u-boot-common_${PV}.inc
-require u-boot.inc
+require recipes-bsp/u-boot/u-boot-common.inc
+require recipes-bsp/u-boot/u-boot.inc
 
+PROVIDES += "u-boot"
 DEPENDS += "bc-native dtc-native"
 
-UBOOT_URL = "git://github.com/renesas-rz/renesas-u-boot-cip.git"
-BRANCH = "v2021.10/rzv2h"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
+UBOOT_URL = "git://github.com/renesas-rz/renesas-u-boot-cip.git"
 SRC_URI = "${UBOOT_URL};branch=${BRANCH};protocol=https"
-SRCREV = "195f7ea10163c1c393e7bb8e8a625d0817a00319"
+BRANCH = "v2021.10/rzv2h"
+SRCREV = "31d53b8f6fdc1d9055a8c226643f4ed61570e017"
 PV = "v2021.10+git${SRCPV}"
+
+FILES:${PN} = "/boot ${sysconfdir}"
+
+# Add the /boot directory to the target's sysroot
+SYSROOT_DIRS += "/boot"
+
+# Define the U-Boot srec file name format
+UBOOT_SREC_SUFFIX = "srec"
+UBOOT_SREC ?= "u-boot-elf.${UBOOT_SREC_SUFFIX}"
+UBOOT_SREC_IMAGE ?= "u-boot-elf-${MACHINE}-${PV}-${PR}.${UBOOT_SREC_SUFFIX}"
+UBOOT_SREC_SYMLINK ?= "u-boot-elf-${MACHINE}.${UBOOT_SREC_SUFFIX}"
+
+# Copy the U-Boot file to the deployment directory and create symbolic links to easily access this file with a simpler name.
+do_deploy:append() {
+    # UBOOT_CONFIG variable is name folder stored uboot srec files. It's defined in rzv2h-evk-ver1.conf
+    if [ -n "${UBOOT_CONFIG}" ]
+    then
+        for config in ${UBOOT_MACHINE}; do
+            i=$(expr $i + 1);
+            for type in ${UBOOT_CONFIG}; do
+                j=$(expr $j + 1);
+                if [ $j -eq $i ]
+                then
+                    install -m 644 ${B}/${config}/${UBOOT_SREC} ${DEPLOYDIR}/u-boot-elf-${type}-${PV}-${PR}.${UBOOT_SREC_SUFFIX}
+                    cd ${DEPLOYDIR}
+                    ln -sf u-boot-elf-${type}-${PV}-${PR}.${UBOOT_SREC_SUFFIX} u-boot-elf-${type}.${UBOOT_SREC_SUFFIX}
+                fi
+            done
+            unset j
+        done
+        unset i
+    else
+        install -m 644 ${B}/${UBOOT_SREC} ${DEPLOYDIR}/${UBOOT_SREC_IMAGE}
+        cd ${DEPLOYDIR}
+        rm -f ${UBOOT_SREC} ${UBOOT_SREC_SYMLINK}
+        ln -sf ${UBOOT_SREC_IMAGE} ${UBOOT_SREC_SYMLINK}
+        ln -sf ${UBOOT_SREC_IMAGE} ${UBOOT_SREC}
+    fi
+}
