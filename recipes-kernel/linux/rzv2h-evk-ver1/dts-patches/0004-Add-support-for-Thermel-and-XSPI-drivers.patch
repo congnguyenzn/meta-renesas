@@ -1,15 +1,13 @@
-From 638cf0379fd8e7ba1cb870e7c1a46fa1b389690c Mon Sep 17 00:00:00 2001
-From: PoC <rvc-poc@renesas.com>
-Date: Thu, 27 Mar 2025 02:31:26 +0000
-Subject: [PATCH 04/12] [Updated] Add thermal and xspi drivers
+From 6877e419d5940b1f6dbb32607b34f6d547c52eaf Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Tue, 15 Apr 2025 03:11:05 +0000
+Subject: [PATCH 04/16] Add support for Thermel and XSPI drivers
 
 Upstream-Status: Pending
-
-Signed-off-by: PoC <rvc-poc@renesas.com>
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    |  91 ++-
  .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts |  42 ++
- arch/arm64/configs/defconfig                  |  50 +-
+ arch/arm64/configs/defconfig                  |  24 +-
  drivers/clk/renesas/r9a09g057-cpg.c           |   2 +
  drivers/dma/sh/rz-dmac.c                      |   4 +-
  drivers/memory/Kconfig                        |   8 +
@@ -23,13 +21,13 @@ Signed-off-by: PoC <rvc-poc@renesas.com>
  drivers/thermal/rzv2h_thermal.c               | 311 ++++++++
  include/memory/renesas-rpc-if.h               |  66 +-
  include/memory/renesas-xspi-if.h              |  36 +
- 16 files changed, 1434 insertions(+), 162 deletions(-)
+ 16 files changed, 1408 insertions(+), 162 deletions(-)
  create mode 100644 drivers/memory/renesas-xspi-if.c
  create mode 100644 drivers/thermal/rzv2h_thermal.c
  create mode 100644 include/memory/renesas-xspi-if.h
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index f71d441750bb..94b16e076e48 100644
+index f71d44175..94b16e076 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -78,6 +78,23 @@ cpus {
@@ -159,7 +157,7 @@ index f71d441750bb..94b16e076e48 100644
  
  	timer {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index ba54347c5428..b3ce631fa92a 100644
+index ba54347c5..b3ce631fa 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -306,4 +306,46 @@ &ostm0 {
@@ -211,7 +209,7 @@ index ba54347c5428..b3ce631fa92a 100644
  };
 \ No newline at end of file
 diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 6a8594a9e64e..d4d1b817d4d4 100644
+index 58837243f..f466055c0 100644
 --- a/arch/arm64/configs/defconfig
 +++ b/arch/arm64/configs/defconfig
 @@ -10,7 +10,8 @@ CONFIG_IRQ_TIME_ACCOUNTING=y
@@ -304,15 +302,15 @@ index 6a8594a9e64e..d4d1b817d4d4 100644
  CONFIG_COMMON_CLK_CS2000_CP=y
  CONFIG_COMMON_CLK_VC3=y
  CONFIG_COMMON_CLK_VC5=y
-@@ -344,6 +337,7 @@ CONFIG_ARCH_R9A09G011=y
- CONFIG_ARCH_R9A09G047=y
+@@ -342,6 +335,7 @@ CONFIG_ARCH_R9A08G045=y
+ CONFIG_ARCH_R9A09G011=y
  CONFIG_ARCH_R9A09G057=y
  CONFIG_RENESAS_RPCIF=y
 +CONFIG_RENESAS_XSPI=y
  CONFIG_IIO=y
  CONFIG_RZG2L_ADC=y
  CONFIG_PWM=y
-@@ -386,7 +380,7 @@ CONFIG_9P_FS=y
+@@ -384,7 +378,7 @@ CONFIG_9P_FS=y
  CONFIG_NLS_CODEPAGE_437=y
  CONFIG_NLS_ISO8859_1=y
  CONFIG_SECURITY=y
@@ -321,41 +319,8 @@ index 6a8594a9e64e..d4d1b817d4d4 100644
  CONFIG_CMA=y
  CONFIG_DMA_CMA=y
  CONFIG_PRINTK_TIME=y
-@@ -402,5 +396,31 @@ CONFIG_MEMTEST=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_EXTCON=y
-+CONFIG_NAMESPACES=y
-+CONFIG_UTS_NS=y
-+CONFIG_TIME_NS=y
-+CONFIG_IPC_NS=y
-+CONFIG_USER_NS=y
-+CONFIG_PID_NS=y
-+CONFIG_NET_NS=y
-+# CONFIG_AMPERE_ERRATUM_AC03_CPU_38 is not set
-+# CONFIG_CAVIUM_ERRATUM_27456 is not set
-+# CONFIG_CAVIUM_ERRATUM_30115 is not set
-+# CONFIG_CAVIUM_TX2_ERRATUM_219 is not set
-+# CONFIG_FUJITSU_ERRATUM_010001 is not set
-+# CONFIG_HISILICON_ERRATUM_161600802 is not set
-+# CONFIG_QCOM_FALKOR_ERRATUM_1003 is not set
-+# CONFIG_QCOM_FALKOR_ERRATUM_1009 is not set
-+# CONFIG_QCOM_QDF2400_ERRATUM_0065 is not set
-+# CONFIG_QCOM_FALKOR_ERRATUM_E1041 is not set
-+# CONFIG_NVIDIA_CARMEL_CNP_ERRATUM is not set
-+# CONFIG_SOCIONEXT_SYNQUACER_PREITS is not set
-+CONFIG_SLAB_FREELIST_HARDENED=y
-+CONFIG_TRANSPARENT_HUGEPAGE_MADVISE=y
-+# CONFIG_DMIID is not set
-+# CONFIG_KEYBOARD_ATKBD is not set
-+# CONFIG_HW_RANDOM is not set
-+# CONFIG_RAS is not set
-+# CONFIG_DMA_PERNUMA_CMA is not set
- CONFIG_LOCALVERSION="-yocto-standard"
- CONFIG_LOCALVERSION_AUTO=n
-\ No newline at end of file
 diff --git a/drivers/clk/renesas/r9a09g057-cpg.c b/drivers/clk/renesas/r9a09g057-cpg.c
-index 4b3cec424514..c0182bf2afcb 100644
+index 4b3cec424..c0182bf2a 100644
 --- a/drivers/clk/renesas/r9a09g057-cpg.c
 +++ b/drivers/clk/renesas/r9a09g057-cpg.c
 @@ -566,6 +566,8 @@ static const struct rzv2h_reset r9a09g057_resets[] __initconst = {
@@ -368,7 +333,7 @@ index 4b3cec424514..c0182bf2afcb 100644
      DEF_RST(10, 8, 4, 25),		/* SDHI_1_IXRST */
      DEF_RST(10, 9, 4, 26),		/* SDHI_2_IXRST */
 diff --git a/drivers/dma/sh/rz-dmac.c b/drivers/dma/sh/rz-dmac.c
-index 442376cbc6a2..e7ab43aa1676 100644
+index 442376cbc..e7ab43aa1 100644
 --- a/drivers/dma/sh/rz-dmac.c
 +++ b/drivers/dma/sh/rz-dmac.c
 @@ -648,8 +648,8 @@ static int rz_dmac_config(struct dma_chan *chan,
@@ -383,7 +348,7 @@ index 442376cbc6a2..e7ab43aa1676 100644
  			val = rz_dmac_ds_to_val_mapping(config->dst_addr_width);
  			if (val == CHCFG_DS_INVALID)
 diff --git a/drivers/memory/Kconfig b/drivers/memory/Kconfig
-index c82d8d8a16ea..c589cb861fd4 100644
+index c82d8d8a1..c589cb861 100644
 --- a/drivers/memory/Kconfig
 +++ b/drivers/memory/Kconfig
 @@ -215,6 +215,14 @@ config RENESAS_RPCIF
@@ -402,7 +367,7 @@ index c82d8d8a16ea..c589cb861fd4 100644
  	tristate "Support for FMC2 External Bus Interface on STM32MP SoCs"
  	depends on ARCH_STM32 || COMPILE_TEST
 diff --git a/drivers/memory/Makefile b/drivers/memory/Makefile
-index d2e6ca9abbe0..7506b6e96637 100644
+index d2e6ca9ab..7506b6e96 100644
 --- a/drivers/memory/Makefile
 +++ b/drivers/memory/Makefile
 @@ -23,6 +23,7 @@ obj-$(CONFIG_MTK_SMI)		+= mtk-smi.o
@@ -414,7 +379,7 @@ index d2e6ca9abbe0..7506b6e96637 100644
  
  obj-$(CONFIG_SAMSUNG_MC)	+= samsung/
 diff --git a/drivers/memory/renesas-rpc-if.c b/drivers/memory/renesas-rpc-if.c
-index 3167826b236a..d94ba297966d 100644
+index 3167826b2..d94ba2979 100644
 --- a/drivers/memory/renesas-rpc-if.c
 +++ b/drivers/memory/renesas-rpc-if.c
 @@ -1,18 +1,18 @@
@@ -864,7 +829,7 @@ index 3167826b236a..d94ba297966d 100644
 \ No newline at end of file
 diff --git a/drivers/memory/renesas-xspi-if.c b/drivers/memory/renesas-xspi-if.c
 new file mode 100644
-index 000000000000..34b40f260ad1
+index 000000000..34b40f260
 --- /dev/null
 +++ b/drivers/memory/renesas-xspi-if.c
 @@ -0,0 +1,706 @@
@@ -1576,7 +1541,7 @@ index 000000000000..34b40f260ad1
 +MODULE_LICENSE("GPL v2");
 \ No newline at end of file
 diff --git a/drivers/spi/Kconfig b/drivers/spi/Kconfig
-index a2c99ff33e0a..e7e58d7c0207 100644
+index a2c99ff33..e7e58d7c0 100644
 --- a/drivers/spi/Kconfig
 +++ b/drivers/spi/Kconfig
 @@ -869,7 +869,7 @@ config SPI_RB4XX
@@ -1589,7 +1554,7 @@ index a2c99ff33e0a..e7e58d7c0207 100644
  	  SPI driver for Renesas R-Car Gen3 or RZ/G2 RPC-IF.
  
 diff --git a/drivers/spi/spi-rpc-if.c b/drivers/spi/spi-rpc-if.c
-index 7cce2d2ab9ca..ca38ec38b183 100644
+index 7cce2d2ab..ca38ec38b 100644
 --- a/drivers/spi/spi-rpc-if.c
 +++ b/drivers/spi/spi-rpc-if.c
 @@ -7,12 +7,14 @@
@@ -1780,7 +1745,7 @@ index 7cce2d2ab9ca..ca38ec38b183 100644
 +MODULE_LICENSE("GPL v2");
 \ No newline at end of file
 diff --git a/drivers/thermal/Kconfig b/drivers/thermal/Kconfig
-index 204ed89a3ec9..af6ff2220240 100644
+index 204ed89a3..af6ff2220 100644
 --- a/drivers/thermal/Kconfig
 +++ b/drivers/thermal/Kconfig
 @@ -369,6 +369,15 @@ config RZG2L_THERMAL
@@ -1800,7 +1765,7 @@ index 204ed89a3ec9..af6ff2220240 100644
  	tristate "Temperature sensor on Marvell Kirkwood SoCs"
  	depends on MACH_KIRKWOOD || COMPILE_TEST
 diff --git a/drivers/thermal/Makefile b/drivers/thermal/Makefile
-index 5cdf7d68687f..6cd8554b8461 100644
+index 5cdf7d686..6cd8554b8 100644
 --- a/drivers/thermal/Makefile
 +++ b/drivers/thermal/Makefile
 @@ -41,6 +41,7 @@ obj-$(CONFIG_ROCKCHIP_THERMAL)	+= rockchip_thermal.o
@@ -1813,7 +1778,7 @@ index 5cdf7d68687f..6cd8554b8461 100644
  obj-$(CONFIG_DOVE_THERMAL)	+= dove_thermal.o
 diff --git a/drivers/thermal/rzv2h_thermal.c b/drivers/thermal/rzv2h_thermal.c
 new file mode 100644
-index 000000000000..2cab08a952ac
+index 000000000..2cab08a95
 --- /dev/null
 +++ b/drivers/thermal/rzv2h_thermal.c
 @@ -0,0 +1,311 @@
@@ -2130,7 +2095,7 @@ index 000000000000..2cab08a952ac
 +MODULE_LICENSE("GPL v2");
 \ No newline at end of file
 diff --git a/include/memory/renesas-rpc-if.h b/include/memory/renesas-rpc-if.h
-index b8fa30fd6b50..9c0639076c1a 100644
+index b8fa30fd6..9c0639076 100644
 --- a/include/memory/renesas-rpc-if.h
 +++ b/include/memory/renesas-rpc-if.h
 @@ -1,11 +1,11 @@
@@ -2223,7 +2188,7 @@ index b8fa30fd6b50..9c0639076c1a 100644
 \ No newline at end of file
 diff --git a/include/memory/renesas-xspi-if.h b/include/memory/renesas-xspi-if.h
 new file mode 100644
-index 000000000000..46370178daa4
+index 000000000..46370178d
 --- /dev/null
 +++ b/include/memory/renesas-xspi-if.h
 @@ -0,0 +1,36 @@

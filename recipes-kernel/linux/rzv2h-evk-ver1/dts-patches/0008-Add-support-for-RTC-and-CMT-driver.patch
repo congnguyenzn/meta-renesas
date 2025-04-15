@@ -1,11 +1,9 @@
-From 8875d8712866b3642d221ed38c095b592e0119ea Mon Sep 17 00:00:00 2001
-From: PoC <rvc-poc@renesas.com>
-Date: Thu, 27 Mar 2025 06:38:50 +0000
-Subject: [PATCH 08/12] [Updated] Add RTC and CMT drivers
+From 0fa1793b75fd001e78d0d3dbb85a24cc0e18c233 Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Tue, 15 Apr 2025 03:23:49 +0000
+Subject: [PATCH 08/16] Add support for RTC and CMT driver
 
 Upstream-Status: Pending
-
-Signed-off-by: PoC <rvc-poc@renesas.com>
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    |  89 ++
  .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts |  14 +
@@ -25,7 +23,7 @@ Signed-off-by: PoC <rvc-poc@renesas.com>
  create mode 100644 drivers/rtc/rtc-rtca3.c
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index 43b7003a112a..9c981ecc12c3 100644
+index 43b7003a1..9c981ecc1 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -107,6 +107,39 @@ et1_rxc_rx_clk: et1_rxc_rx_clk {
@@ -167,7 +165,7 @@ index 43b7003a112a..9c981ecc12c3 100644
  
  	thermal-zones {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index 5de554c20a79..94642bbd2f98 100644
+index 5de554c20..94642bbd2 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -352,4 +352,18 @@ partition@200000 {
@@ -191,10 +189,10 @@ index 5de554c20a79..94642bbd2f98 100644
  };
 \ No newline at end of file
 diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 8a9bd4b0038b..4217b24223b8 100644
+index e4bc59caf..823eb5c01 100644
 --- a/arch/arm64/configs/defconfig
 +++ b/arch/arm64/configs/defconfig
-@@ -394,6 +394,7 @@ CONFIG_DEBUG_FS=y
+@@ -392,6 +392,7 @@ CONFIG_DEBUG_FS=y
  # CONFIG_DEBUG_PREEMPT is not set
  # CONFIG_FTRACE is not set
  CONFIG_MEMTEST=y
@@ -202,8 +200,9 @@ index 8a9bd4b0038b..4217b24223b8 100644
  CONFIG_IKCONFIG=y
  CONFIG_IKCONFIG_PROC=y
  CONFIG_EXTCON=y
+\ No newline at end of file
 diff --git a/drivers/clk/renesas/r9a09g057-cpg.c b/drivers/clk/renesas/r9a09g057-cpg.c
-index c0182bf2afcb..b3792eb5a4d7 100644
+index c0182bf2a..b3792eb5a 100644
 --- a/drivers/clk/renesas/r9a09g057-cpg.c
 +++ b/drivers/clk/renesas/r9a09g057-cpg.c
 @@ -94,6 +94,14 @@ enum clk_ids {
@@ -237,7 +236,7 @@ index c0182bf2afcb..b3792eb5a4d7 100644
  
  static const struct rzv2h_mod_clk r9a09g057_mod_clks[] __initconst = {
 diff --git a/drivers/clocksource/Kconfig b/drivers/clocksource/Kconfig
-index 34faa0320ece..13b39d48bc1b 100644
+index 34faa0320..13b39d48b 100644
 --- a/drivers/clocksource/Kconfig
 +++ b/drivers/clocksource/Kconfig
 @@ -464,6 +464,10 @@ config VF_PIT_TIMER
@@ -268,7 +267,7 @@ index 34faa0320ece..13b39d48bc1b 100644
  	bool "Renesas MTU2 timer driver" if COMPILE_TEST
  	depends on HAS_IOMEM
 diff --git a/drivers/clocksource/Makefile b/drivers/clocksource/Makefile
-index 4bb856e4df55..488f7edf3c53 100644
+index 4bb856e4d..488f7edf3 100644
 --- a/drivers/clocksource/Makefile
 +++ b/drivers/clocksource/Makefile
 @@ -9,6 +9,7 @@ obj-$(CONFIG_SCx200HR_TIMER)	+= scx200_hrt.o
@@ -281,7 +280,7 @@ index 4bb856e4df55..488f7edf3c53 100644
  obj-$(CONFIG_SH_TIMER_TMU)	+= sh_tmu.o
 diff --git a/drivers/clocksource/rz_cmtw.c b/drivers/clocksource/rz_cmtw.c
 new file mode 100644
-index 000000000000..f98f166d2dcb
+index 000000000..f98f166d2
 --- /dev/null
 +++ b/drivers/clocksource/rz_cmtw.c
 @@ -0,0 +1,565 @@
@@ -852,7 +851,7 @@ index 000000000000..f98f166d2dcb
 +MODULE_LICENSE("GPL v2");
 \ No newline at end of file
 diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index 2a95b05982ad..422621025984 100644
+index 2a95b0598..422621025 100644
 --- a/drivers/rtc/Kconfig
 +++ b/drivers/rtc/Kconfig
 @@ -1485,6 +1485,14 @@ config RTC_DRV_SH
@@ -871,7 +870,7 @@ index 2a95b05982ad..422621025984 100644
  	tristate "Sunplus SP7021 RTC"
  	depends on SOC_SP7021
 diff --git a/drivers/rtc/Makefile b/drivers/rtc/Makefile
-index 3004e372f25f..f479d18e79b0 100644
+index 3004e372f..f479d18e7 100644
 --- a/drivers/rtc/Makefile
 +++ b/drivers/rtc/Makefile
 @@ -164,6 +164,7 @@ obj-$(CONFIG_RTC_DRV_SA1100)	+= rtc-sa1100.o
@@ -884,7 +883,7 @@ index 3004e372f25f..f479d18e79b0 100644
  obj-$(CONFIG_RTC_DRV_STARFIRE)	+= rtc-starfire.o
 diff --git a/drivers/rtc/rtc-rtca3.c b/drivers/rtc/rtc-rtca3.c
 new file mode 100644
-index 000000000000..9b8c61d4f08b
+index 000000000..9b8c61d4f
 --- /dev/null
 +++ b/drivers/rtc/rtc-rtca3.c
 @@ -0,0 +1,789 @@
@@ -1679,7 +1678,7 @@ index 000000000000..9b8c61d4f08b
 +MODULE_LICENSE("GPL v2");
 \ No newline at end of file
 diff --git a/drivers/soc/renesas/Kconfig b/drivers/soc/renesas/Kconfig
-index e90a19b51b62..73607526faae 100644
+index e90a19b51..73607526f 100644
 --- a/drivers/soc/renesas/Kconfig
 +++ b/drivers/soc/renesas/Kconfig
 @@ -354,6 +354,7 @@ config ARCH_R9A09G011
@@ -1691,7 +1690,7 @@ index e90a19b51b62..73607526faae 100644
  	  This enables support for the Renesas RZ/V2H SoC variants.
  
 diff --git a/drivers/tty/serial/sh-sci.c b/drivers/tty/serial/sh-sci.c
-index f738980a8b2c..916845fcb852 100644
+index f738980a8..916845fcb 100644
 --- a/drivers/tty/serial/sh-sci.c
 +++ b/drivers/tty/serial/sh-sci.c
 @@ -317,6 +317,37 @@ static const struct sci_port_params sci_port_params[SCIx_NR_REGTYPES] = {
@@ -1797,7 +1796,7 @@ index f738980a8b2c..916845fcb852 100644
  OF_EARLYCON_DECLARE(scifb, "renesas,scifb", scifb_early_console_setup);
  OF_EARLYCON_DECLARE(hscif, "renesas,hscif", hscif_early_console_setup);
 diff --git a/include/linux/serial_sci.h b/include/linux/serial_sci.h
-index 1c89611e0e06..0f2f50b8d28e 100644
+index 1c89611e0..0f2f50b8d 100644
 --- a/include/linux/serial_sci.h
 +++ b/include/linux/serial_sci.h
 @@ -37,6 +37,7 @@ enum {

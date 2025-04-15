@@ -1,13 +1,9 @@
-From d3ed5b1702a9521c0ef8a3e8be10d8b451e52df4 Mon Sep 17 00:00:00 2001
-From: PoC <rvc-poc@renesas.com>
-Date: Thu, 27 Mar 2025 03:31:33 +0000
-Subject: [PATCH 05/12] [Updated] Add audio and hdmi drivers
-
-Note: does not support rzv2h evk ver1 yet
+From 5c3dbfd710940cfcb80d6375d6e191f92f4b654b Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Tue, 15 Apr 2025 03:20:56 +0000
+Subject: [PATCH 05/16] Add support for Audio and HDMI drivers
 
 Upstream-Status: Pending
-
-Signed-off-by: PoC <rvc-poc@renesas.com>
 ---
  .../bindings/sound/renesas,rz-ssi.yaml        |   4 +
  drivers/gpu/drm/renesas/rcar-du/Kconfig       |   8 -
@@ -27,7 +23,7 @@ Signed-off-by: PoC <rvc-poc@renesas.com>
  rename drivers/gpu/drm/renesas/{rcar-du => rz-du}/rzg2l_mipi_dsi_regs.h (100%)
 
 diff --git a/Documentation/devicetree/bindings/sound/renesas,rz-ssi.yaml b/Documentation/devicetree/bindings/sound/renesas,rz-ssi.yaml
-index 8b9695f5decc..42a142805079 100644
+index 8b9695f5d..42a142805 100644
 --- a/Documentation/devicetree/bindings/sound/renesas,rz-ssi.yaml
 +++ b/Documentation/devicetree/bindings/sound/renesas,rz-ssi.yaml
 @@ -87,6 +87,10 @@ properties:
@@ -42,7 +38,7 @@ index 8b9695f5decc..42a142805079 100644
    - compatible
    - reg
 diff --git a/drivers/gpu/drm/renesas/rcar-du/Kconfig b/drivers/gpu/drm/renesas/rcar-du/Kconfig
-index 53c356aed5d5..39af73cf2092 100644
+index 53c356aed..39af73cf2 100644
 --- a/drivers/gpu/drm/renesas/rcar-du/Kconfig
 +++ b/drivers/gpu/drm/renesas/rcar-du/Kconfig
 @@ -60,14 +60,6 @@ config DRM_RCAR_MIPI_DSI
@@ -61,7 +57,7 @@ index 53c356aed5d5..39af73cf2092 100644
  	bool "R-Car DU VSP Compositor Support" if ARM
  	default y if ARM64
 diff --git a/drivers/gpu/drm/renesas/rcar-du/Makefile b/drivers/gpu/drm/renesas/rcar-du/Makefile
-index b8f2c82651d9..6f132325c8b7 100644
+index b8f2c8265..6f132325c 100644
 --- a/drivers/gpu/drm/renesas/rcar-du/Makefile
 +++ b/drivers/gpu/drm/renesas/rcar-du/Makefile
 @@ -14,5 +14,3 @@ obj-$(CONFIG_DRM_RCAR_DU)		+= rcar-du-drm.o
@@ -71,7 +67,7 @@ index b8f2c82651d9..6f132325c8b7 100644
 -
 -obj-$(CONFIG_DRM_RZG2L_MIPI_DSI)	+= rzg2l_mipi_dsi.o
 diff --git a/drivers/gpu/drm/renesas/rz-du/Kconfig b/drivers/gpu/drm/renesas/rz-du/Kconfig
-index 5f0db2c5fee6..8f3172838b14 100644
+index 5f0db2c5f..8f3172838 100644
 --- a/drivers/gpu/drm/renesas/rz-du/Kconfig
 +++ b/drivers/gpu/drm/renesas/rz-du/Kconfig
 @@ -10,3 +10,16 @@ config DRM_RZG2L_DU
@@ -93,7 +89,7 @@ index 5f0db2c5fee6..8f3172838b14 100644
 + 	select DRM_MIPI_DSI
 \ No newline at end of file
 diff --git a/drivers/gpu/drm/renesas/rz-du/Makefile b/drivers/gpu/drm/renesas/rz-du/Makefile
-index 663b82a2577f..2987900ea6b6 100644
+index 663b82a25..2987900ea 100644
 --- a/drivers/gpu/drm/renesas/rz-du/Makefile
 +++ b/drivers/gpu/drm/renesas/rz-du/Makefile
 @@ -6,3 +6,5 @@ rzg2l-du-drm-y := rzg2l_du_crtc.o \
@@ -103,7 +99,7 @@ index 663b82a2577f..2987900ea6b6 100644
 +
 +obj-$(CONFIG_DRM_RZG2L_MIPI_DSI)	+= rzg2l_mipi_dsi.o
 diff --git a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_crtc.c b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_crtc.c
-index 6e7aac6219be..f34c1615e636 100644
+index 6e7aac621..f34c1615e 100644
 --- a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_crtc.c
 +++ b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_crtc.c
 @@ -28,6 +28,7 @@
@@ -192,7 +188,7 @@ index 6e7aac6219be..f34c1615e636 100644
  
  static struct drm_crtc_state *
 diff --git a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c
-index 470d34da1d6c..100281114d70 100644
+index 470d34da1..100281114 100644
 --- a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c
 +++ b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c
 @@ -25,6 +25,16 @@
@@ -221,7 +217,7 @@ index 470d34da1d6c..100281114d70 100644
  	{ /* sentinel */ }
  };
 diff --git a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c
-index 07b312b6f81e..4998945e6723 100644
+index 07b312b6f..4998945e6 100644
 --- a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c
 +++ b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c
 @@ -183,7 +183,8 @@ static int rzg2l_du_encoders_init(struct rzg2l_du_device *rcdu)
@@ -243,7 +239,7 @@ similarity index 100%
 rename from drivers/gpu/drm/renesas/rcar-du/rzg2l_mipi_dsi_regs.h
 rename to drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi_regs.h
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c
-index 280efd2a8185..4d499dae17fd 100644
+index 280efd2a8..4d499dae1 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c
 @@ -132,6 +132,34 @@ static const struct v4l2_async_notifier_operations rzg2l_cru_async_ops = {
@@ -322,7 +318,7 @@ index 280efd2a8185..4d499dae17fd 100644
  	rzg2l_cru_dma_unregister(cru);
  	pm_runtime_disable(&pdev->dev);
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h
-index a5a99b004322..427f6c243879 100644
+index a5a99b004..427f6c243 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h
 @@ -11,6 +11,7 @@
@@ -352,7 +348,7 @@ index a5a99b004322..427f6c243879 100644
  	struct rzg2l_cru_csi csi;
  	struct media_device mdev;
 diff --git a/sound/soc/sh/rz-ssi.c b/sound/soc/sh/rz-ssi.c
-index 9d103646973a..c88a2e164d3c 100644
+index 9d1036469..c88a2e164 100644
 --- a/sound/soc/sh/rz-ssi.c
 +++ b/sound/soc/sh/rz-ssi.c
 @@ -52,6 +52,7 @@

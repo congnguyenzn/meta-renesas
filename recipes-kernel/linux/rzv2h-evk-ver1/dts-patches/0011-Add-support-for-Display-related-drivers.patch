@@ -1,25 +1,24 @@
-From 72127ec24cc2847c16065decd36e507b6f895ebe Mon Sep 17 00:00:00 2001
+From 8738e414737c52ad28536400a998356ec1219ad4 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
-Date: Tue, 1 Apr 2025 08:08:37 +0000
-Subject: [PATCH 11/12] Add display related drivers
+Date: Tue, 15 Apr 2025 03:33:33 +0000
+Subject: [PATCH 11/16] Add support for Display related drivers
 
 Upstream-Status: Pending
-
-Signed-off-by: Cong Nguyen <cong.nguyen.zn@renesas.com>
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    | 149 +++-
- .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts | 173 +++--
+ .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts | 125 +++-
  drivers/clk/renesas/r9a09g057-cpg.c           |  10 +-
  drivers/clk/renesas/rzv2h-cpg.c               | 269 ++++++-
  drivers/clk/renesas/rzv2h-cpg.h               |  54 +-
  drivers/gpu/drm/renesas/rz-du/Kconfig         |   1 -
  drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c  |  11 +
+ drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c  |   6 +-
  .../gpu/drm/renesas/rz-du/rzg2l_mipi_dsi.c    | 672 +++++++++++++++---
  .../drm/renesas/rz-du/rzg2l_mipi_dsi_regs.h   |  43 +-
- 9 files changed, 1198 insertions(+), 184 deletions(-)
+ 10 files changed, 1177 insertions(+), 163 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index e9b5177a0d71..d1609c525faa 100644
+index e9b5177a0..d1609c525 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -883,14 +883,14 @@ cru0: video0@16000000 {
@@ -324,18 +323,9 @@ index e9b5177a0d71..d1609c525faa 100644
  
  	thermal-zones {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index 0733a9b98c04..07b326f5e190 100644
+index bac4f8060..e0b8cb43f 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-@@ -18,7 +18,7 @@ aliases {
- 		serial0 = &scif;
- 		mmc0 = &sdhi0;
- 		mmc1 = &sdhi1;
--		mmc2 = &sdhi2;	
-+		mmc2 = &sdhi2;
- 		ethernet0 = &eth0;
- 		ethernet1 = &eth1;
-         };
 @@ -132,12 +132,29 @@ vqmmc_sdhi1: regulator-vccq-sdhi1 {
  		states = <3300000 0 1800000 1>;
  	};
@@ -436,18 +426,6 @@ index 0733a9b98c04..07b326f5e190 100644
  	usb30_pins: usb30 {
  		pinmux = <RZV2H_PORT_PINMUX(B, 0, 14)>; /* VBUS */
  	};
-@@ -392,9 +414,9 @@ phy1: ethernet-phy@0 {
- &i2c0 {
-  	pinctrl-0 = <&i2c0_pins>;
-  	pinctrl-names = "default";
-- 
-+
-  	status = "okay";
-- 
-+
-  	ov5645_csi20: ov5645_csi20@3c {
-  		compatible = "ovti,ov5645";
-  		reg = <0x3c>;
 @@ -406,7 +428,7 @@ ov5645_csi20: ov5645_csi20@3c {
   		/* Set dummy enable gpio */
   		enable-gpios = <&gpio_dummy 0 GPIO_ACTIVE_HIGH>;
@@ -457,23 +435,6 @@ index 0733a9b98c04..07b326f5e190 100644
   		port {
   			ov5645_to_csi20: endpoint {
   				clock-lanes = <0>;
-@@ -416,13 +438,13 @@ ov5645_to_csi20: endpoint {
-  		};
-  	};
- };
-- 
-+
- &i2c1 {
-  	pinctrl-0 = <&i2c1_pins>;
-  	pinctrl-names = "default";
-- 
-+
-  	status = "okay";
-- 
-+
-  	ov5645_csi21: ov5645_csi21@3c {
-  		compatible = "ovti,ov5645";
-  		reg = <0x3c>;
 @@ -434,7 +456,7 @@ ov5645_csi21: ov5645_csi21@3c {
   		/* Set dummy enable gpio */
   		enable-gpios = <&gpio_dummy 1 GPIO_ACTIVE_HIGH>;
@@ -483,23 +444,6 @@ index 0733a9b98c04..07b326f5e190 100644
   		port {
   			ov5645_to_csi21: endpoint {
   				clock-lanes = <0>;
-@@ -444,13 +466,13 @@ ov5645_to_csi21: endpoint {
-  		};
-  	};
- };
-- 
-+
- &i2c6 {
-  	pinctrl-0 = <&i2c6_pins>;
-  	pinctrl-names = "default";
-- 
-+
-  	status = "okay";
-- 
-+
-  	ov5645_csi22: ov5645_csi22@3c {
-  		compatible = "ovti,ov5645";
-  		reg = <0x3c>;
 @@ -461,7 +483,7 @@ ov5645_csi22: ov5645_csi22@3c {
   		vddd-supply = <&ov5645_vddd_1v5>;
   		enable-gpios = <&pinctrl RZV2H_GPIO(6, 1) GPIO_ACTIVE_HIGH>;
@@ -509,23 +453,6 @@ index 0733a9b98c04..07b326f5e190 100644
   		port {
   			ov5645_to_csi22: endpoint {
   				clock-lanes = <0>;
-@@ -471,13 +493,13 @@ ov5645_to_csi22: endpoint {
-  		};
-  	};
- };
-- 
-+
- &i2c7 {
-  	pinctrl-0 = <&i2c7_pins>;
-  	pinctrl-names = "default";
-- 
-+
-  	status = "okay";
-- 
-+
-  	ov5645_csi23: ov5645_csi23@3c {
-  		compatible = "ovti,ov5645";
-  		reg = <0x3c>;
 @@ -488,7 +510,7 @@ ov5645_csi23: ov5645_csi23@3c {
   		vddd-supply = <&ov5645_vddd_1v5>;
   		enable-gpios = <&pinctrl RZV2H_GPIO(6, 0) GPIO_ACTIVE_HIGH>;
@@ -535,78 +462,6 @@ index 0733a9b98c04..07b326f5e190 100644
   		port {
   			ov5645_to_csi23: endpoint {
   				clock-lanes = <0>;
-@@ -498,14 +520,14 @@ ov5645_to_csi23: endpoint {
-  		};
-  	};
- };
-- 
-+
- &cru0 {
-  	status = "okay";
- };
-- 
-+
- &csi20 {
-  	status = "okay";
-- 
-+
-  	ports {
-  		port {
-  			csi20_in: endpoint {
-@@ -516,14 +538,14 @@ csi20_in: endpoint {
-  		};
-  	};
- };
-- 
-+
- &cru1 {
-  	status = "okay";
- };
-- 
-+
- &csi21 {
-  	status = "okay";
-- 
-+
-  	ports {
-  		port {
-  			csi21_in: endpoint {
-@@ -534,14 +556,14 @@ csi21_in: endpoint {
-  		};
-  	};
- };
-- 
-+
- &cru2 {
-  	status = "okay";
- };
-- 
-+
- &csi22 {
-  	status = "okay";
-- 
-+
-  	ports {
-  		port {
-  			csi22_in: endpoint {
-@@ -552,14 +574,14 @@ csi22_in: endpoint {
-  		};
-  	};
- };
-- 
-+
- &cru3 {
-  	status = "okay";
- };
-- 
-+
- &csi23 {
-  	status = "okay";
-- 
-+
-  	ports {
-  		port {
-  			csi23_in: endpoint {
 @@ -621,6 +643,65 @@ partition@200000 {
  	};
  };
@@ -674,7 +529,7 @@ index 0733a9b98c04..07b326f5e190 100644
  	status = "okay";
  };
 diff --git a/drivers/clk/renesas/r9a09g057-cpg.c b/drivers/clk/renesas/r9a09g057-cpg.c
-index b3792eb5a4d7..117b2fa22d88 100644
+index b3792eb5a..117b2fa22 100644
 --- a/drivers/clk/renesas/r9a09g057-cpg.c
 +++ b/drivers/clk/renesas/r9a09g057-cpg.c
 @@ -193,10 +193,10 @@ static const struct cpg_core_clk r9a09g057_core_clks[] __initconst = {
@@ -702,7 +557,7 @@ index b3792eb5a4d7..117b2fa22d88 100644
      DEF_DDIV(".pllgpu_gear", CLK_PLLGPU_GEAR, CLK_PLLGPU,
          CDDIVx_DIVCTLy(3, 1, 3), dtable_2_64),
 diff --git a/drivers/clk/renesas/rzv2h-cpg.c b/drivers/clk/renesas/rzv2h-cpg.c
-index 606c4666b9ba..c2c8f765671c 100644
+index 606c4666b..c2c8f7656 100644
 --- a/drivers/clk/renesas/rzv2h-cpg.c
 +++ b/drivers/clk/renesas/rzv2h-cpg.c
 @@ -24,6 +24,7 @@
@@ -1072,7 +927,7 @@ index 606c4666b9ba..c2c8f765671c 100644
          goto fail;
      }
 diff --git a/drivers/clk/renesas/rzv2h-cpg.h b/drivers/clk/renesas/rzv2h-cpg.h
-index aca0d61a52a9..a3af7bdda8ec 100644
+index aca0d61a5..a3af7bdda 100644
 --- a/drivers/clk/renesas/rzv2h-cpg.h
 +++ b/drivers/clk/renesas/rzv2h-cpg.h
 @@ -8,6 +8,19 @@
@@ -1189,7 +1044,7 @@ index aca0d61a52a9..a3af7bdda8ec 100644
  /**
  * struct rzv2h_mod_clk - Module Clocks definitions
 diff --git a/drivers/gpu/drm/renesas/rz-du/Kconfig b/drivers/gpu/drm/renesas/rz-du/Kconfig
-index 5e63d68c96ac..8fd60778f228 100644
+index 5e63d68c9..8fd60778f 100644
 --- a/drivers/gpu/drm/renesas/rz-du/Kconfig
 +++ b/drivers/gpu/drm/renesas/rz-du/Kconfig
 @@ -23,4 +23,3 @@ config DRM_RZG2L_MIPI_DSI
@@ -1199,7 +1054,7 @@ index 5e63d68c96ac..8fd60778f228 100644
 -	
 \ No newline at end of file
 diff --git a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c
-index 100281114d70..d218278a4347 100644
+index 100281114..d218278a4 100644
 --- a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c
 +++ b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_drv.c
 @@ -49,9 +49,20 @@ static const struct rzg2l_du_device_info rzg2l_du_r9a07g044_info = {
@@ -1223,8 +1078,27 @@ index 100281114d70..d218278a4347 100644
  	{ /* sentinel */ }
  };
  
+diff --git a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c
+index 4998945e6..ac2763d72 100644
+--- a/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c
++++ b/drivers/gpu/drm/renesas/rz-du/rzg2l_du_kms.c
+@@ -311,11 +311,11 @@ int rzg2l_du_modeset_init(struct rzg2l_du_device *rcdu)
+ 	dev->mode_config.helper_private = &rzg2l_du_mode_config_helper;
+ 
+ 	/*
+-	 * The RZ DU uses the VSP1 for memory access, and is limited
+-	 * to frame sizes of 1920x1080.
++	 * The RZ DU was designed to support a frame size of 1920x1200 (landscape)
++ 	 * or 1200x1920 (portrait).
+ 	 */
+ 	dev->mode_config.max_width = 1920;
+-	dev->mode_config.max_height = 1080;
++	dev->mode_config.max_height = 1920;
+ 
+ 	rcdu->num_crtcs = hweight8(rcdu->info->channels_mask);
+ 
 diff --git a/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi.c b/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi.c
-index 10febea473cd..ac0e6b7d1f67 100644
+index 10febea47..ac0e6b7d1 100644
 --- a/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi.c
 +++ b/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi.c
 @@ -15,6 +15,7 @@
@@ -2228,7 +2102,7 @@ index 10febea473cd..ac0e6b7d1f67 100644
  };
  
 diff --git a/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi_regs.h b/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi_regs.h
-index 1dbc16ec64a4..e45f1196f766 100644
+index 1dbc16ec6..e45f1196f 100644
 --- a/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi_regs.h
 +++ b/drivers/gpu/drm/renesas/rz-du/rzg2l_mipi_dsi_regs.h
 @@ -10,7 +10,7 @@

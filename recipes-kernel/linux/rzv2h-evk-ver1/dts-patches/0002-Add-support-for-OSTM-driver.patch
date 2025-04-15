@@ -1,18 +1,16 @@
-From de2f47e8b1292dc5f6f5ecd2257807ca32704d0e Mon Sep 17 00:00:00 2001
-From: PoC <rvc-poc@renesas.com>
-Date: Wed, 26 Mar 2025 04:20:47 +0000
-Subject: [PATCH 02/12] [Updated] Add support for OSTM
+From fa56bb5d241433710d2bf7e9751bdd0c510b64a8 Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Tue, 15 Apr 2025 03:09:52 +0000
+Subject: [PATCH 02/16] Add support for OSTM driver
 
 Upstream-Status: Pending
-
-Signed-off-by: PoC <rvc-poc@renesas.com>
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    | 80 +++++++++++++++++++
  .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts |  8 ++
  2 files changed, 88 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index e036ef92878d..7e4a2cdea617 100644
+index e036ef928..7e4a2cdea 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -296,6 +296,86 @@ eth1: ethernet@15C40000 {
@@ -103,7 +101,7 @@ index e036ef92878d..7e4a2cdea617 100644
  
  	timer {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index 1a1acd85e5db..ba54347c5428 100644
+index 1a1acd85e..ba54347c5 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -298,4 +298,12 @@ phy1: ethernet-phy@0 {

@@ -1,11 +1,12 @@
-From 98c679f538e95c378a4e90a86560f4dab31ab699 Mon Sep 17 00:00:00 2001
+From fb9baf2f0f40c2517ad3b0ec9955b0ef51af26e9 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
-Date: Mon, 31 Mar 2025 07:33:01 +0000
-Subject: [PATCH 10/12] Add CRU driver for rzv2h evk
+Date: Tue, 15 Apr 2025 03:25:40 +0000
+Subject: [PATCH 10/16] Add support for CRU driver
+
+Currently this driver is disable in the dts file.
+Set status to "okay" to enable CRU driver.
 
 Upstream-Status: Pending
-
-Signed-off-by: Cong Nguyen <cong.nguyen.zn@renesas.com>
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    | 228 +++++++++
  .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts | 247 ++++++++++
@@ -20,7 +21,7 @@ Signed-off-by: Cong Nguyen <cong.nguyen.zn@renesas.com>
  10 files changed, 1142 insertions(+), 140 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index 18293fb5542b..e9b5177a0d71 100644
+index 18293fb55..e9b5177a0 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -869,6 +869,234 @@ eth1: ethernet@15C40000 {
@@ -259,7 +260,7 @@ index 18293fb5542b..e9b5177a0d71 100644
  			compatible = "renesas,r9a09g057-ostm", "renesas,ostm";
  			reg = <0x0 0x11800000 0x0 0x1000>;
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index d558931abf28..0733a9b98c04 100644
+index d558931ab..bac4f8060 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -132,6 +132,43 @@ vqmmc_sdhi1: regulator-vccq-sdhi1 {
@@ -356,7 +357,7 @@ index d558931abf28..0733a9b98c04 100644
 + 	pinctrl-0 = <&i2c0_pins>;
 + 	pinctrl-names = "default";
 + 
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ov5645_csi20: ov5645_csi20@3c {
 + 		compatible = "ovti,ov5645";
@@ -384,7 +385,7 @@ index d558931abf28..0733a9b98c04 100644
 + 	pinctrl-0 = <&i2c1_pins>;
 + 	pinctrl-names = "default";
 + 
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ov5645_csi21: ov5645_csi21@3c {
 + 		compatible = "ovti,ov5645";
@@ -412,7 +413,7 @@ index d558931abf28..0733a9b98c04 100644
 + 	pinctrl-0 = <&i2c6_pins>;
 + 	pinctrl-names = "default";
 + 
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ov5645_csi22: ov5645_csi22@3c {
 + 		compatible = "ovti,ov5645";
@@ -439,7 +440,7 @@ index d558931abf28..0733a9b98c04 100644
 + 	pinctrl-0 = <&i2c7_pins>;
 + 	pinctrl-names = "default";
 + 
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ov5645_csi23: ov5645_csi23@3c {
 + 		compatible = "ovti,ov5645";
@@ -467,7 +468,7 @@ index d558931abf28..0733a9b98c04 100644
 +};
 + 
 +&csi20 {
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ports {
 + 		port {
@@ -485,7 +486,7 @@ index d558931abf28..0733a9b98c04 100644
 +};
 + 
 +&csi21 {
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ports {
 + 		port {
@@ -503,7 +504,7 @@ index d558931abf28..0733a9b98c04 100644
 +};
 + 
 +&csi22 {
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ports {
 + 		port {
@@ -521,7 +522,7 @@ index d558931abf28..0733a9b98c04 100644
 +};
 + 
 +&csi23 {
-+ 	status = "okay";
++ 	status = "disabled";
 + 
 + 	ports {
 + 		port {
@@ -538,7 +539,7 @@ index d558931abf28..0733a9b98c04 100644
  	status = "okay";
  };
 diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index 4217b24223b8..5d4ec4842bde 100644
+index 823eb5c01..f348107f8 100644
 --- a/arch/arm64/configs/defconfig
 +++ b/arch/arm64/configs/defconfig
 @@ -171,6 +171,7 @@ CONFIG_SPI_RPCIF=y
@@ -550,7 +551,7 @@ index 4217b24223b8..5d4ec4842bde 100644
  CONFIG_GPIO_PCA953X_IRQ=y
  CONFIG_GPIO_SYSFS=y
 diff --git a/drivers/gpio/Kconfig b/drivers/gpio/Kconfig
-index 1c28a48915bb..74223761e43d 100644
+index 1c28a4891..74223761e 100644
 --- a/drivers/gpio/Kconfig
 +++ b/drivers/gpio/Kconfig
 @@ -562,6 +562,12 @@ config GPIO_RCAR
@@ -567,7 +568,7 @@ index 1c28a48915bb..74223761e43d 100644
  	bool "RDA Micro GPIO controller support"
  	depends on ARCH_RDA || COMPILE_TEST
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c
-index 4d499dae17fd..97bc5d123f8b 100644
+index 4d499dae1..97bc5d123 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-core.c
 @@ -73,6 +73,7 @@ static int rzg2l_cru_group_notify_complete(struct v4l2_async_notifier *notifier)
@@ -778,7 +779,7 @@ index 4d499dae17fd..97bc5d123f8b 100644
  };
  MODULE_DEVICE_TABLE(of, rzg2l_cru_of_id_table);
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h
-index 427f6c243879..95823e487952 100644
+index 427f6c243..95823e487 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-cru.h
 @@ -16,6 +16,61 @@
@@ -896,7 +897,7 @@ index 427f6c243879..95823e487952 100644
  
  int rzg2l_cru_start_image_processing(struct rzg2l_cru_dev *cru);
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-csi2.c b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-csi2.c
-index c7fdee347ac8..1dc6be2c4694 100644
+index c7fdee347..1dc6be2c4 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-csi2.c
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-csi2.c
 @@ -85,6 +85,15 @@
@@ -1084,7 +1085,7 @@ index c7fdee347ac8..1dc6be2c4694 100644
  };
  MODULE_DEVICE_TABLE(of, rzg2l_csi2_of_table);
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-ip.c b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-ip.c
-index ac8ebae4ed07..7fc3cdbd56fe 100644
+index ac8ebae4e..7fc3cdbd5 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-ip.c
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-ip.c
 @@ -97,6 +97,8 @@ static int rzg2l_cru_ip_set_format(struct v4l2_subdev *sd,
@@ -1130,7 +1131,7 @@ index ac8ebae4ed07..7fc3cdbd56fe 100644
  	return 0;
  }
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c
-index b16b8af6e8f8..5ac950a42eeb 100644
+index b16b8af6e..5ac950a42 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c
 @@ -1,15 +1,15 @@
@@ -1933,7 +1934,7 @@ index b16b8af6e8f8..5ac950a42eeb 100644
  static int rzg2l_cru_open(struct file *file)
  {
 diff --git a/drivers/pinctrl/renesas/Kconfig b/drivers/pinctrl/renesas/Kconfig
-index 14bd55d64731..6d19e41823d7 100644
+index 14bd55d64..6d19e4182 100644
 --- a/drivers/pinctrl/renesas/Kconfig
 +++ b/drivers/pinctrl/renesas/Kconfig
 @@ -41,6 +41,7 @@ config PINCTRL_RENESAS

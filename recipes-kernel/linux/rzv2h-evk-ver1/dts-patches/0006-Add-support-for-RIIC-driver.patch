@@ -1,18 +1,16 @@
-From d9ebfee584d9d76fa6871bd51f53d8e0adc1db8a Mon Sep 17 00:00:00 2001
-From: PoC <rvc-poc@renesas.com>
-Date: Thu, 27 Mar 2025 04:40:16 +0000
-Subject: [PATCH 06/12] [Updated] Add riic driver
+From 6753d3021fcdeaff190a2fee5e3a31ef75f70a58 Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Tue, 15 Apr 2025 03:21:21 +0000
+Subject: [PATCH 06/16] Add support for RIIC driver
 
 Upstream-Status: Pending
-
-Signed-off-by: PoC <rvc-poc@renesas.com>
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi | 232 +++++++++++++++++-
  drivers/i2c/busses/i2c-riic.c              | 261 +++++++++++++++------
  2 files changed, 414 insertions(+), 79 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index 94b16e076e48..cd7c7e1a8675 100644
+index 94b16e076..cd7c7e1a8 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -13,7 +13,40 @@ / {
@@ -271,7 +269,7 @@ index 94b16e076e48..cd7c7e1a8675 100644
  			compatible = "arm,gic-v3";
  			#interrupt-cells = <3>;
 diff --git a/drivers/i2c/busses/i2c-riic.c b/drivers/i2c/busses/i2c-riic.c
-index f608b1838cad..264fcf805055 100644
+index f608b1838..264fcf805 100644
 --- a/drivers/i2c/busses/i2c-riic.c
 +++ b/drivers/i2c/busses/i2c-riic.c
 @@ -40,6 +40,7 @@

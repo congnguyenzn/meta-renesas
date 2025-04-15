@@ -1,11 +1,9 @@
-From 927370c6de1c2333de4acf56ef26d7376ca869dd Mon Sep 17 00:00:00 2001
-From: PoC <rvc-poc@renesas.com>
-Date: Thu, 27 Mar 2025 10:05:41 +0000
-Subject: [PATCH 09/12] [Updated] Add CAN driver
+From a5483d9cd6b2cf0c4e5f4f58eb44fd24696b1387 Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Tue, 15 Apr 2025 03:24:08 +0000
+Subject: [PATCH 09/16] Add support for CAN driver
 
 Upstream-Status: Pending
-
-Signed-off-by: PoC <rvc-poc@renesas.com>
 ---
  .../bindings/net/can/renesas,rcar-canfd.yaml  |   2 +
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    |  60 +++++++++
@@ -14,7 +12,7 @@ Signed-off-by: PoC <rvc-poc@renesas.com>
  4 files changed, 188 insertions(+), 29 deletions(-)
 
 diff --git a/Documentation/devicetree/bindings/net/can/renesas,rcar-canfd.yaml b/Documentation/devicetree/bindings/net/can/renesas,rcar-canfd.yaml
-index d3f45d29fa0a..b634da4ed341 100644
+index d3f45d29f..b634da4ed 100644
 --- a/Documentation/devicetree/bindings/net/can/renesas,rcar-canfd.yaml
 +++ b/Documentation/devicetree/bindings/net/can/renesas,rcar-canfd.yaml
 @@ -40,6 +40,8 @@ properties:
@@ -27,7 +25,7 @@ index d3f45d29fa0a..b634da4ed341 100644
    reg:
      maxItems: 1
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index 9c981ecc12c3..18293fb5542b 100644
+index 9c981ecc1..18293fb55 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -448,6 +448,66 @@ scif: serial@11c01400 {
@@ -98,7 +96,7 @@ index 9c981ecc12c3..18293fb5542b 100644
  			compatible = "renesas,sdhi-r9a09g057";
  			reg = <0x0 0x15c00000 0 0x10000>;
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index 94642bbd2f98..d558931abf28 100644
+index 94642bbd2..d558931ab 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -18,7 +18,7 @@ aliases {
@@ -166,7 +164,7 @@ index 94642bbd2f98..d558931abf28 100644
  	status = "okay";
  };
 diff --git a/drivers/net/can/rcar/rcar_canfd.c b/drivers/net/can/rcar/rcar_canfd.c
-index b82842718735..5421f06b5c4f 100644
+index b82842718..5421f06b5 100644
 --- a/drivers/net/can/rcar/rcar_canfd.c
 +++ b/drivers/net/can/rcar/rcar_canfd.c
 @@ -187,6 +187,7 @@

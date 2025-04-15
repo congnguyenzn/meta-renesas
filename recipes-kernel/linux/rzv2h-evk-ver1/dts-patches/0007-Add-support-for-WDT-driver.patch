@@ -1,11 +1,9 @@
-From 71cbce88781bad5bd26a700ea1cdb3183f7e6e32 Mon Sep 17 00:00:00 2001
-From: PoC <rvc-poc@renesas.com>
-Date: Thu, 27 Mar 2025 06:17:22 +0000
-Subject: [PATCH 07/12] [Updated] Add wdt driver
+From 7a55485843f286a6a120b925d25678458fee17bf Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Tue, 15 Apr 2025 03:21:40 +0000
+Subject: [PATCH 07/16] Add support for WDT driver
 
 Upstream-Status: Pending
-
-Signed-off-by: PoC <rvc-poc@renesas.com>
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    |  44 +++
  .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts |   4 +
@@ -18,7 +16,7 @@ Signed-off-by: PoC <rvc-poc@renesas.com>
  create mode 100644 drivers/watchdog/rzv2h_wdt.c
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index cd7c7e1a8675..43b7003a112a 100644
+index cd7c7e1a8..43b7003a1 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -885,6 +885,50 @@ tsu1: thermal@14002000 {
@@ -73,7 +71,7 @@ index cd7c7e1a8675..43b7003a112a 100644
  
  	thermal-zones {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index b3ce631fa92a..5de554c20a79 100644
+index b3ce631fa..5de554c20 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -348,4 +348,8 @@ partition@200000 {
@@ -87,7 +85,7 @@ index b3ce631fa92a..5de554c20a79 100644
  };
 \ No newline at end of file
 diff --git a/arch/arm64/configs/defconfig b/arch/arm64/configs/defconfig
-index d4d1b817d4d4..8a9bd4b0038b 100644
+index f466055c0..e4bc59caf 100644
 --- a/arch/arm64/configs/defconfig
 +++ b/arch/arm64/configs/defconfig
 @@ -188,6 +188,7 @@ CONFIG_WATCHDOG=y
@@ -99,7 +97,7 @@ index d4d1b817d4d4..8a9bd4b0038b 100644
  CONFIG_MFD_ROHM_BD718XX=y
  CONFIG_MFD_DA9062=y
 diff --git a/drivers/gpu/drm/renesas/rz-du/Kconfig b/drivers/gpu/drm/renesas/rz-du/Kconfig
-index 8f3172838b14..5e63d68c96ac 100644
+index 8f3172838..5e63d68c9 100644
 --- a/drivers/gpu/drm/renesas/rz-du/Kconfig
 +++ b/drivers/gpu/drm/renesas/rz-du/Kconfig
 @@ -22,4 +22,5 @@ config DRM_RZG2L_USE_MIPI_DSI
@@ -112,7 +110,7 @@ index 8f3172838b14..5e63d68c96ac 100644
 +	
 \ No newline at end of file
 diff --git a/drivers/watchdog/Kconfig b/drivers/watchdog/Kconfig
-index 2882944d23cc..ed9826715780 100644
+index 2882944d2..ed9826715 100644
 --- a/drivers/watchdog/Kconfig
 +++ b/drivers/watchdog/Kconfig
 @@ -939,6 +939,15 @@ config RENESAS_RZG2LWDT
@@ -132,7 +130,7 @@ index 2882944d23cc..ed9826715780 100644
  	tristate "Aspeed BMC watchdog support"
  	depends on ARCH_ASPEED || COMPILE_TEST
 diff --git a/drivers/watchdog/Makefile b/drivers/watchdog/Makefile
-index 2d1117564f5b..295909a1b3b9 100644
+index 2d1117564..295909a1b 100644
 --- a/drivers/watchdog/Makefile
 +++ b/drivers/watchdog/Makefile
 @@ -86,6 +86,7 @@ obj-$(CONFIG_RENESAS_WDT) += renesas_wdt.o
@@ -145,7 +143,7 @@ index 2d1117564f5b..295909a1b3b9 100644
  obj-$(CONFIG_UNIPHIER_WATCHDOG) += uniphier_wdt.o
 diff --git a/drivers/watchdog/rzv2h_wdt.c b/drivers/watchdog/rzv2h_wdt.c
 new file mode 100644
-index 000000000000..1169a124bdbb
+index 000000000..1169a124b
 --- /dev/null
 +++ b/drivers/watchdog/rzv2h_wdt.c
 @@ -0,0 +1,273 @@
