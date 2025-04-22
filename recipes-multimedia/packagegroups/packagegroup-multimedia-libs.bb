@@ -6,6 +6,7 @@ DEPENDS = "mmngr-user-module mmngrbuf-user-module \
 "
 
 PR = "r0"
+PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 inherit packagegroup
 
