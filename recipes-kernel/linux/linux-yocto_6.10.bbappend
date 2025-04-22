@@ -26,7 +26,8 @@ SRC_URI:append:rzv2h-evk-ver1 = "\
     file://dts-patches/0011-Add-support-for-Display-related-drivers.patch \
     file://dts-patches/0012-Add-isu-fcpcs-and-vdpb-nodes.patch \
     file://dts-patches/0013-Add-support-for-USB2.0-driver.patch \
-    file://dts-patches/0014-Add-support-for-GPU-panfrost-driver.patch \
+    file://dts-patches/0014-Add-support-for-USB3.0-driver.patch \
+    file://dts-patches/0015-Add-support-for-GPU-panfrost-driver.patch \
 "
 
 SRC_URI:append:rzv2h-evk-ver1 = "\

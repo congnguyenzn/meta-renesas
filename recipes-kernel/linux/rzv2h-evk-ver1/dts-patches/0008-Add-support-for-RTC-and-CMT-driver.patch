@@ -1,7 +1,7 @@
-From 0fa1793b75fd001e78d0d3dbb85a24cc0e18c233 Mon Sep 17 00:00:00 2001
+From 06707a0edf1e67f7432e9caabc731ad2e3bca7c7 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:23:49 +0000
-Subject: [PATCH 08/16] Add support for RTC and CMT driver
+Subject: [PATCH 08/19] Add support for RTC and CMT driver
 
 Upstream-Status: Pending
 ---
@@ -165,10 +165,10 @@ index 43b7003a1..9c981ecc1 100644
  
  	thermal-zones {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index 5de554c20..94642bbd2 100644
+index 829955200..cd01c28fd 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-@@ -352,4 +352,18 @@ partition@200000 {
+@@ -360,4 +360,18 @@ partition@200000 {
  
  &wdt1 {
   	status = "okay";

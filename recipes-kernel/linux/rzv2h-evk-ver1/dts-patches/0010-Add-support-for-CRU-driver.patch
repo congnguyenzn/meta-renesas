@@ -1,13 +1,14 @@
-From fb9baf2f0f40c2517ad3b0ec9955b0ef51af26e9 Mon Sep 17 00:00:00 2001
+From 5edd46f8d02728d239cecf98a3a1ed396ddef8a9 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:25:40 +0000
-Subject: [PATCH 10/16] Add support for CRU driver
+Subject: [PATCH 10/19] Add support for CRU driver
 
 Currently this driver is disable in the dts file.
 Set status to "okay" to enable CRU driver.
 
 Upstream-Status: Pending
 ---
+ .../reset/renesas,rzv2h-usbphy-ctrl.yaml      |  75 +++
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    | 228 +++++++++
  .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts | 247 ++++++++++
  arch/arm64/configs/defconfig                  |   1 +
@@ -16,10 +17,93 @@ Upstream-Status: Pending
  .../platform/renesas/rzg2l-cru/rzg2l-cru.h    |  71 ++-
  .../platform/renesas/rzg2l-cru/rzg2l-csi2.c   | 117 ++++-
  .../platform/renesas/rzg2l-cru/rzg2l-ip.c     |  13 +-
- .../platform/renesas/rzg2l-cru/rzg2l-video.c  | 455 +++++++++++++-----
+ .../platform/renesas/rzg2l-cru/rzg2l-video.c  | 456 +++++++++++++-----
  drivers/pinctrl/renesas/Kconfig               |   1 +
- 10 files changed, 1142 insertions(+), 140 deletions(-)
+ 11 files changed, 1218 insertions(+), 140 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/reset/renesas,rzv2h-usbphy-ctrl.yaml
 
+diff --git a/Documentation/devicetree/bindings/reset/renesas,rzv2h-usbphy-ctrl.yaml b/Documentation/devicetree/bindings/reset/renesas,rzv2h-usbphy-ctrl.yaml
+new file mode 100644
+index 000000000..0e78af656
+--- /dev/null
++++ b/Documentation/devicetree/bindings/reset/renesas,rzv2h-usbphy-ctrl.yaml
+@@ -0,0 +1,75 @@
++# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
++%YAML 1.2
++---
++$id: http://devicetree.org/schemas/reset/renesas,rzv2h-usbphy-ctrl.yaml#
++$schema: http://devicetree.org/meta-schemas/core.yaml#
++
++title: Renesas RZ/V2H USBPHY Control
++
++maintainers:
++  - Biju Das <biju.das.jz@bp.renesas.com>
++
++description:
++  The RZ/V2H USBPHY Control mainly controls reset and power down of the
++  USB/PHY.
++
++properties:
++  compatible:
++    items:
++      - enum:
++          - renesas,r9a09g057-usbphy-ctrl # RZ/V2H
++      - const: renesas,rzv2h-usbphy-ctrl
++
++  reg:
++    maxItems: 1
++
++  clocks:
++    maxItems: 1
++
++  resets:
++    maxItems: 1
++
++  power-domains:
++    maxItems: 1
++
++  '#reset-cells':
++    const: 1
++    description: |
++      The phandle's argument in the reset specifier is the PHY reset associated
++      with the USB port.
++      0 = Port 1 Phy reset
++      1 = Port 2 Phy reset
++
++required:
++  - compatible
++  - reg
++  - clocks
++  - resets
++  - power-domains
++  - '#reset-cells'
++
++additionalProperties: false
++
++examples:
++  - |
++        #include <dt-bindings/clock/r9a09g057-cpg.h>
++
++        usb20phyrst: usb20phy-ctrl@15830000 {
++                compatible = "renesas,r9a09g057-usbphy-ctrl",
++                             "renesas,rzv2h-usbphy-ctrl";
++                reg = <0 0x15830000 0 0x10000>;
++                clocks = <&cpg CPG_MOD R9A09G057_USB2_PCLK_USBTST0>;
++                resets = <&cpg R9A09G057_USB2_PRESETN>;
++                power-domains = <&cpg>;
++                #reset-cells = <1>;
++        };
++
++        usb21phyrst: usb21phy-ctrl@15840000 {
++                compatible = "renesas,r9a09g057-usbphy-ctrl",
++                             "renesas,rzv2h-usbphy-ctrl";
++                reg = <0 0x15840000 0 0x10000>;
++                clocks = <&cpg CPG_MOD R9A09G057_USB2_PCLK_USBTST1>;
++                resets = <&cpg R9A09G057_USB2_PRESETN>;
++                power-domains = <&cpg>;
++                #reset-cells = <1>;
++        };
+\ No newline at end of file
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 index 18293fb55..e9b5177a0 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
@@ -260,10 +344,10 @@ index 18293fb55..e9b5177a0 100644
  			compatible = "renesas,r9a09g057-ostm", "renesas,ostm";
  			reg = <0x0 0x11800000 0x0 0x1000>;
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index d558931ab..bac4f8060 100644
+index 78c234dca..42eb37d2e 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-@@ -132,6 +132,43 @@ vqmmc_sdhi1: regulator-vccq-sdhi1 {
+@@ -154,6 +154,43 @@ vqmmc_sdhi1: regulator-vccq-sdhi1 {
  		states = <3300000 0 1800000 1>;
  	};
  
@@ -307,8 +391,8 @@ index d558931ab..bac4f8060 100644
  	osc1: cec-clock {
  		compatible = "fixed-clock";
  		#clock-cells = <0>;
-@@ -169,6 +206,14 @@ sd1_pwr_en {
- 		line-name = "sd1_pwr_en";
+@@ -177,6 +214,14 @@ scif_pins: scif {
+ 		renesas,output-impedance = <1>;
  	};
  
 +	/* cam0_pwr_en is used by Google Coral Camera from CSI20 and CSI21 */
@@ -322,7 +406,7 @@ index d558931ab..bac4f8060 100644
  	sdhi0_pins: sd0 {
  		sd0_mux {
  			pinmux = <RZV2H_PORT_PINMUX(A, 5, 15)>; /* SD0_CD */
-@@ -201,6 +246,26 @@ sd1_cd {
+@@ -209,6 +254,26 @@ sd1_cd {
  		};
  	};
  
@@ -349,7 +433,7 @@ index d558931ab..bac4f8060 100644
  	usb30_pins: usb30 {
  		pinmux = <RZV2H_PORT_PINMUX(B, 0, 14)>; /* VBUS */
  	};
-@@ -324,6 +389,188 @@ phy1: ethernet-phy@0 {
+@@ -332,6 +397,188 @@ phy1: ethernet-phy@0 {
  	};
  };
  
@@ -1131,7 +1215,7 @@ index ac8ebae4e..7fc3cdbd5 100644
  	return 0;
  }
 diff --git a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c
-index b16b8af6e..5ac950a42 100644
+index b16b8af6e..754c3719e 100644
 --- a/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c
 +++ b/drivers/media/platform/renesas/rzg2l-cru/rzg2l-video.c
 @@ -1,15 +1,15 @@
@@ -1625,7 +1709,7 @@ index b16b8af6e..5ac950a42 100644
  	ret = v4l2_subdev_call(sd, video, s_stream, 1);
  	if (ret && ret != -ENOIOCTLCMD)
  		goto err_s_stream;
-@@ -564,18 +664,18 @@ static irqreturn_t rzg2l_cru_irq(int irq, void *data)
+@@ -564,18 +664,130 @@ static irqreturn_t rzg2l_cru_irq(int irq, void *data)
  	slot = amnmbs & AMnMBS_MBSTS;
  
  	/*
@@ -1647,13 +1731,40 @@ index b16b8af6e..5ac950a42 100644
 +	* To hand buffers back in a known order to userspace start
 +	* to capture first from slot 0.
 +	*/
- 	if (cru->state == RZG2L_CRU_DMA_STARTING) {
- 		if (slot != 0) {
- 			dev_dbg(cru->dev, "Starting sync slot: %d\n", slot);
-@@ -610,6 +710,117 @@ static irqreturn_t rzg2l_cru_irq(int irq, void *data)
- 	return IRQ_RETVAL(handled);
- }
- 
++	if (cru->state == RZG2L_CRU_DMA_STARTING) {
++		if (slot != 0) {
++			dev_dbg(cru->dev, "Starting sync slot: %d\n", slot);
++			goto done;
++		}
++
++		dev_dbg(cru->dev, "Capture start synced!\n");
++		cru->state = RZG2L_CRU_DMA_RUNNING;
++	}
++
++	/* Capture frame */
++	if (cru->queue_buf[slot]) {
++		cru->queue_buf[slot]->field = cru->format.field;
++		cru->queue_buf[slot]->sequence = cru->sequence;
++		cru->queue_buf[slot]->vb2_buf.timestamp = ktime_get_ns();
++		vb2_buffer_done(&cru->queue_buf[slot]->vb2_buf,
++				VB2_BUF_STATE_DONE);
++		cru->queue_buf[slot] = NULL;
++	} else {
++		/* Scratch buffer was used, dropping frame. */
++		dev_dbg(cru->dev, "Dropping frame %u\n", cru->sequence);
++	}
++
++	cru->sequence++;
++
++	/* Prepare for next frame */
++	rzg2l_cru_fill_hw_slot(cru, slot);
++
++done:
++	spin_unlock_irqrestore(&cru->qlock, flags);
++
++	return IRQ_RETVAL(handled);
++}
++
 +static irqreturn_t rzv2h_cru_irq(int irq, void *data)
 +{
 +	struct rzg2l_cru_dev *cru = data;
@@ -1709,6 +1820,22 @@ index b16b8af6e..5ac950a42 100644
 +		goto done;
 +	}
 +
++	if (slot != prev_slot[cru->id]) {
++		/* Update value of previous memory bank slot */
++		prev_slot[cru->id] = slot;
++	} else {
++		/*
++		 * AXI-Bus congestion maybe occurred.
++		 * Set auto recovery mode to clear all FIFOs
++		 * and resume transmission.
++		 */
++		rzg2l_cru_write(cru, AMnFIFO, 0);
++
++		dev_dbg(cru->dev, "Dropping frame %u with CRU channel %d\n",
++			cru->sequence, cru->id);
++		goto done;
++	}
++
 +	amnmbxaddrl[cru->id][slot] = 0;
 +	amnmbxaddrh[cru->id][slot] = 0;
 +
@@ -1716,59 +1843,10 @@ index b16b8af6e..5ac950a42 100644
 +	* To hand buffers back in a known order to userspace start
 +	* to capture first from slot 0.
 +	*/
-+	if (cru->state == RZG2L_CRU_DMA_STARTING) {
-+		if (slot != 0) {
-+			dev_dbg(cru->dev, "Starting sync slot: %d\n", slot);
-+			goto done;
-+		}
-+
-+		dev_dbg(cru->dev, "Capture start synced!\n");
-+		cru->state = RZG2L_CRU_DMA_RUNNING;
-+	}
-+
-+	if (slot != prev_slot[cru->id]) {
-+		/* Update value of previous memory bank slot */
-+		prev_slot[cru->id] = slot;
-+	} else {
-+		/*
-+		* AXI-Bus congestion maybe occurred.
-+		* Set auto recovery mode to clear all FIFOs
-+		* and resume transmission.
-+		*/
-+		rzg2l_cru_write(cru, AMnFIFO, 0);
-+
-+		dev_dbg(cru->dev, "Dropping frame %u with CRU channel %d\n",
-+			cru->sequence, cru->id);
-+	}
-+
-+	/* Capture frame */
-+	if (cru->queue_buf[slot]) {
-+		cru->queue_buf[slot]->field = cru->format.field;
-+		cru->queue_buf[slot]->sequence = cru->sequence;
-+		cru->queue_buf[slot]->vb2_buf.timestamp = ktime_get_ns();
-+		vb2_buffer_done(&cru->queue_buf[slot]->vb2_buf,
-+				VB2_BUF_STATE_DONE);
-+		cru->queue_buf[slot] = NULL;
-+	} else {
-+		/* Scratch buffer was used, dropping frame. */
-+		dev_dbg(cru->dev, "Dropping frame %u\n", cru->sequence);
-+	}
-+
-+	cru->sequence++;
-+
-+	/* Prepare for next frame */
-+	rzg2l_cru_fill_hw_slot(cru, slot);
-+
-+done:
-+	spin_unlock_irqrestore(&cru->qlock, flags);
-+
-+	return IRQ_RETVAL(handled);
-+}
-+
- static int rzg2l_cru_start_streaming_vq(struct vb2_queue *vq, unsigned int count)
- {
- 	struct rzg2l_cru_dev *cru = vb2_get_drv_priv(vq);
-@@ -637,8 +848,10 @@ static int rzg2l_cru_start_streaming_vq(struct vb2_queue *vq, unsigned int count
+ 	if (cru->state == RZG2L_CRU_DMA_STARTING) {
+ 		if (slot != 0) {
+ 			dev_dbg(cru->dev, "Starting sync slot: %d\n", slot);
+@@ -637,8 +849,10 @@ static int rzg2l_cru_start_streaming_vq(struct vb2_queue *vq, unsigned int count
  		goto assert_aresetn;
  	}
  
@@ -1781,7 +1859,7 @@ index b16b8af6e..5ac950a42 100644
  	if (ret) {
  		dev_err(cru->dev, "failed to request irq\n");
  		goto assert_presetn;
-@@ -646,7 +859,7 @@ static int rzg2l_cru_start_streaming_vq(struct vb2_queue *vq, unsigned int count
+@@ -646,7 +860,7 @@ static int rzg2l_cru_start_streaming_vq(struct vb2_queue *vq, unsigned int count
  
  	/* Allocate scratch buffer. */
  	cru->scratch = dma_alloc_coherent(cru->dev, cru->format.sizeimage,
@@ -1790,7 +1868,7 @@ index b16b8af6e..5ac950a42 100644
  	if (!cru->scratch) {
  		return_unused_buffers(cru, VB2_BUF_STATE_QUEUED);
  		dev_err(cru->dev, "Failed to allocate scratch buffer\n");
-@@ -663,13 +876,17 @@ static int rzg2l_cru_start_streaming_vq(struct vb2_queue *vq, unsigned int count
+@@ -663,13 +877,17 @@ static int rzg2l_cru_start_streaming_vq(struct vb2_queue *vq, unsigned int count
  	}
  
  	cru->state = RZG2L_CRU_DMA_STARTING;
@@ -1809,7 +1887,7 @@ index b16b8af6e..5ac950a42 100644
  free_image_conv_irq:
  	free_irq(cru->image_conv_irq, cru);
  
-@@ -696,7 +913,7 @@ static void rzg2l_cru_stop_streaming_vq(struct vb2_queue *vq)
+@@ -696,7 +914,7 @@ static void rzg2l_cru_stop_streaming_vq(struct vb2_queue *vq)
  
  	/* Free scratch buffer */
  	dma_free_coherent(cru->dev, cru->format.sizeimage,
@@ -1818,7 +1896,7 @@ index b16b8af6e..5ac950a42 100644
  
  	free_irq(cru->image_conv_irq, cru);
  	return_unused_buffers(cru, VB2_BUF_STATE_ERROR);
-@@ -772,8 +989,8 @@ int rzg2l_cru_dma_register(struct rzg2l_cru_dev *cru)
+@@ -772,8 +990,8 @@ int rzg2l_cru_dma_register(struct rzg2l_cru_dev *cru)
  }
  
  /* -----------------------------------------------------------------------------
@@ -1829,7 +1907,7 @@ index b16b8af6e..5ac950a42 100644
  
  static const struct v4l2_format_info rzg2l_cru_formats[] = {
  	{
-@@ -811,8 +1028,10 @@ static u32 rzg2l_cru_format_sizeimage(struct v4l2_pix_format *pix)
+@@ -811,8 +1029,10 @@ static u32 rzg2l_cru_format_sizeimage(struct v4l2_pix_format *pix)
  }
  
  static void rzg2l_cru_format_align(struct rzg2l_cru_dev *cru,
@@ -1841,7 +1919,7 @@ index b16b8af6e..5ac950a42 100644
  	if (!rzg2l_cru_format_from_pixel(pix->pixelformat))
  		pix->pixelformat = RZG2L_CRU_DEFAULT_FORMAT;
  
-@@ -830,8 +1049,8 @@ static void rzg2l_cru_format_align(struct rzg2l_cru_dev *cru,
+@@ -830,8 +1050,8 @@ static void rzg2l_cru_format_align(struct rzg2l_cru_dev *cru,
  	}
  
  	/* Limit to CRU capabilities */
@@ -1852,7 +1930,7 @@ index b16b8af6e..5ac950a42 100644
  
  	pix->bytesperline = rzg2l_cru_format_bytesperline(pix);
  	pix->sizeimage = rzg2l_cru_format_sizeimage(pix);
-@@ -841,25 +1060,25 @@ static void rzg2l_cru_format_align(struct rzg2l_cru_dev *cru,
+@@ -841,25 +1061,25 @@ static void rzg2l_cru_format_align(struct rzg2l_cru_dev *cru,
  }
  
  static void rzg2l_cru_try_format(struct rzg2l_cru_dev *cru,
@@ -1886,7 +1964,7 @@ index b16b8af6e..5ac950a42 100644
  {
  	strscpy(cap->driver, KBUILD_MODNAME, sizeof(cap->driver));
  	strscpy(cap->card, "RZG2L_CRU", sizeof(cap->card));
-@@ -868,7 +1087,7 @@ static int rzg2l_cru_querycap(struct file *file, void *priv,
+@@ -868,7 +1088,7 @@ static int rzg2l_cru_querycap(struct file *file, void *priv,
  }
  
  static int rzg2l_cru_try_fmt_vid_cap(struct file *file, void *priv,
@@ -1895,7 +1973,7 @@ index b16b8af6e..5ac950a42 100644
  {
  	struct rzg2l_cru_dev *cru = video_drvdata(file);
  
-@@ -878,7 +1097,7 @@ static int rzg2l_cru_try_fmt_vid_cap(struct file *file, void *priv,
+@@ -878,7 +1098,7 @@ static int rzg2l_cru_try_fmt_vid_cap(struct file *file, void *priv,
  }
  
  static int rzg2l_cru_s_fmt_vid_cap(struct file *file, void *priv,
@@ -1904,7 +1982,7 @@ index b16b8af6e..5ac950a42 100644
  {
  	struct rzg2l_cru_dev *cru = video_drvdata(file);
  
-@@ -893,7 +1112,7 @@ static int rzg2l_cru_s_fmt_vid_cap(struct file *file, void *priv,
+@@ -893,7 +1113,7 @@ static int rzg2l_cru_s_fmt_vid_cap(struct file *file, void *priv,
  }
  
  static int rzg2l_cru_g_fmt_vid_cap(struct file *file, void *priv,
@@ -1913,7 +1991,7 @@ index b16b8af6e..5ac950a42 100644
  {
  	struct rzg2l_cru_dev *cru = video_drvdata(file);
  
-@@ -903,7 +1122,7 @@ static int rzg2l_cru_g_fmt_vid_cap(struct file *file, void *priv,
+@@ -903,7 +1123,7 @@ static int rzg2l_cru_g_fmt_vid_cap(struct file *file, void *priv,
  }
  
  static int rzg2l_cru_enum_fmt_vid_cap(struct file *file, void *priv,
@@ -1922,7 +2000,7 @@ index b16b8af6e..5ac950a42 100644
  {
  	if (f->index >= ARRAY_SIZE(rzg2l_cru_formats))
  		return -EINVAL;
-@@ -932,8 +1151,8 @@ static const struct v4l2_ioctl_ops rzg2l_cru_ioctl_ops = {
+@@ -932,8 +1152,8 @@ static const struct v4l2_ioctl_ops rzg2l_cru_ioctl_ops = {
  };
  
  /* -----------------------------------------------------------------------------

@@ -1,7 +1,7 @@
-From 5c3dbfd710940cfcb80d6375d6e191f92f4b654b Mon Sep 17 00:00:00 2001
+From 9068522b6cd6b6653e3c4cbe1c3e5c5696fd86c5 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:20:56 +0000
-Subject: [PATCH 05/16] Add support for Audio and HDMI drivers
+Subject: [PATCH 05/19] Add support for Audio and HDMI drivers
 
 Upstream-Status: Pending
 ---

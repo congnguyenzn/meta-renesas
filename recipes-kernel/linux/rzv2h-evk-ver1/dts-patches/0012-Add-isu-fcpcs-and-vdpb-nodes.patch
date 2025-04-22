@@ -1,7 +1,7 @@
-From 326718506b0fa18623156151915ba9599e946c31 Mon Sep 17 00:00:00 2001
+From b84c97745f9f86ec6b0acd3d9173b171f1e07686 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:42:22 +0000
-Subject: [PATCH 12/16] Add isu, fcpcs and vdpb nodes
+Subject: [PATCH 12/19] Add isu, fcpcs and vdpb nodes
 
 Upstream-Status: Pending
 ---

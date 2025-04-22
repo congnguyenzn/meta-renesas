@@ -1,7 +1,7 @@
-From c5988efa7c0bcfb720f967c280452155aa34cae9 Mon Sep 17 00:00:00 2001
+From 1fe608567caa114af656ec2ecfaec6a6a098e325 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:10:07 +0000
-Subject: [PATCH 03/16] Add support for DMAC and ICU dirvers
+Subject: [PATCH 03/19] Add support for DMAC and ICU dirvers
 
 Upstream-Status: Pending
 ---

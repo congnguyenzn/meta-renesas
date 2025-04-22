@@ -1,7 +1,7 @@
-From a5483d9cd6b2cf0c4e5f4f58eb44fd24696b1387 Mon Sep 17 00:00:00 2001
+From 93815d16563400e144a30b93fa3e19308056847b Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:24:08 +0000
-Subject: [PATCH 09/16] Add support for CAN driver
+Subject: [PATCH 09/19] Add support for CAN driver
 
 Upstream-Status: Pending
 ---
@@ -96,7 +96,7 @@ index 9c981ecc1..18293fb55 100644
  			compatible = "renesas,sdhi-r9a09g057";
  			reg = <0x0 0x15c00000 0 0x10000>;
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index 94642bbd2..d558931ab 100644
+index cd01c28fd..78c234dca 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -18,7 +18,7 @@ aliases {
@@ -108,7 +108,7 @@ index 94642bbd2..d558931ab 100644
  		ethernet0 = &eth0;
  		ethernet1 = &eth1;
          };
-@@ -140,6 +140,16 @@ osc1: cec-clock {
+@@ -162,6 +162,16 @@ osc1: cec-clock {
  };
  
  &pinctrl {
@@ -125,7 +125,7 @@ index 94642bbd2..d558931ab 100644
  	scif_pins: scif {
  		pins =  "SCIF_RXD", "SCIF_TXD";
  		renesas,output-impedance = <1>;
-@@ -221,6 +231,20 @@ &scif {
+@@ -229,6 +239,20 @@ &scif {
  	status = "okay";
  };
  
@@ -146,7 +146,7 @@ index 94642bbd2..d558931ab 100644
  &sdhi0 {
  	pinctrl-0 = <&sdhi0_pins>;
  	pinctrl-names = "default";
-@@ -351,15 +375,13 @@ partition@200000 {
+@@ -359,15 +383,13 @@ partition@200000 {
  };
  
  &wdt1 {

@@ -1,7 +1,7 @@
-From fa56bb5d241433710d2bf7e9751bdd0c510b64a8 Mon Sep 17 00:00:00 2001
+From 2486838ba5d7f6aaa4d1a9c4850dd92cb6f70fea Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:09:52 +0000
-Subject: [PATCH 02/16] Add support for OSTM driver
+Subject: [PATCH 02/19] Add support for OSTM driver
 
 Upstream-Status: Pending
 ---
@@ -101,10 +101,10 @@ index e036ef928..7e4a2cdea 100644
  
  	timer {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index 1a1acd85e..ba54347c5 100644
+index ee2825d41..f4a62dea3 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-@@ -298,4 +298,12 @@ phy1: ethernet-phy@0 {
+@@ -306,4 +306,12 @@ phy1: ethernet-phy@0 {
  			txd3-skew-psec = <0>;
  		};
  	};

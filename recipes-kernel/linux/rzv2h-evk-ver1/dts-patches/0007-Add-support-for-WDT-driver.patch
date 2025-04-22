@@ -1,7 +1,7 @@
-From 7a55485843f286a6a120b925d25678458fee17bf Mon Sep 17 00:00:00 2001
+From 272840e27f1eb9874758dbaf83ab041c028ebff1 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:21:40 +0000
-Subject: [PATCH 07/16] Add support for WDT driver
+Subject: [PATCH 07/19] Add support for WDT driver
 
 Upstream-Status: Pending
 ---
@@ -71,10 +71,10 @@ index cd7c7e1a8..43b7003a1 100644
  
  	thermal-zones {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index b3ce631fa..5de554c20 100644
+index af8f8249f..829955200 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-@@ -348,4 +348,8 @@ partition@200000 {
+@@ -356,4 +356,8 @@ partition@200000 {
  			};
  		};
  	};

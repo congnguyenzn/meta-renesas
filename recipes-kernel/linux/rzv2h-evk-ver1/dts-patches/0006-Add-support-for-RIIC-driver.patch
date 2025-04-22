@@ -1,7 +1,7 @@
-From 6753d3021fcdeaff190a2fee5e3a31ef75f70a58 Mon Sep 17 00:00:00 2001
+From b08931af525238eeeb469cf84dd3084534c32ed1 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:21:21 +0000
-Subject: [PATCH 06/16] Add support for RIIC driver
+Subject: [PATCH 06/19] Add support for RIIC driver
 
 Upstream-Status: Pending
 ---

@@ -1,7 +1,7 @@
-From 8738e414737c52ad28536400a998356ec1219ad4 Mon Sep 17 00:00:00 2001
+From 74eb2fddbef03bd4fe44ea67bb1d0670bfcac1b3 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:33:33 +0000
-Subject: [PATCH 11/16] Add support for Display related drivers
+Subject: [PATCH 11/19] Add support for Display related drivers
 
 Upstream-Status: Pending
 ---
@@ -323,10 +323,10 @@ index e9b5177a0..d1609c525 100644
  
  	thermal-zones {
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index bac4f8060..e0b8cb43f 100644
+index 42eb37d2e..061ffe654 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-@@ -132,12 +132,29 @@ vqmmc_sdhi1: regulator-vccq-sdhi1 {
+@@ -154,12 +154,29 @@ vqmmc_sdhi1: regulator-vccq-sdhi1 {
  		states = <3300000 0 1800000 1>;
  	};
  
@@ -357,7 +357,7 @@ index bac4f8060..e0b8cb43f 100644
   	ov5645_vdddo_1v8: 1p8v {
   		compatible = "regulator-fixed";
   		regulator-name = "camera_vdddo";
-@@ -145,7 +162,7 @@ ov5645_vdddo_1v8: 1p8v {
+@@ -167,7 +184,7 @@ ov5645_vdddo_1v8: 1p8v {
   		regulator-max-microvolt = <1800000>;
   		regulator-always-on;
   	};
@@ -366,7 +366,7 @@ index bac4f8060..e0b8cb43f 100644
   	ov5645_vdda_2v8: 2p8v {
   		compatible = "regulator-fixed";
   		regulator-name = "camera_vdda";
-@@ -153,7 +170,7 @@ ov5645_vdda_2v8: 2p8v {
+@@ -175,7 +192,7 @@ ov5645_vdda_2v8: 2p8v {
   		regulator-max-microvolt = <2800000>;
   		regulator-always-on;
   	};
@@ -375,7 +375,7 @@ index bac4f8060..e0b8cb43f 100644
   	ov5645_vddd_1v5: 1p5v {
   		compatible = "regulator-fixed";
   		regulator-name = "camera_vddd";
-@@ -161,7 +178,7 @@ ov5645_vddd_1v5: 1p5v {
+@@ -183,7 +200,7 @@ ov5645_vddd_1v5: 1p5v {
   		regulator-max-microvolt = <1500000>;
   		regulator-always-on;
   	};
@@ -384,7 +384,7 @@ index bac4f8060..e0b8cb43f 100644
   	gpio_dummy: gpio-dummy {
   		compatible = "gpio-dummy";
   		gpio-controller;
-@@ -250,22 +267,27 @@ i2c0_pins: i2c0 {
+@@ -258,22 +275,27 @@ i2c0_pins: i2c0 {
   		pinmux = <RZV2H_PORT_PINMUX(3, 0, 1)>, /* I2C0_SDA */
   			 <RZV2H_PORT_PINMUX(3, 1, 1)>; /* I2C0_SCL */
   	};
@@ -426,7 +426,7 @@ index bac4f8060..e0b8cb43f 100644
  	usb30_pins: usb30 {
  		pinmux = <RZV2H_PORT_PINMUX(B, 0, 14)>; /* VBUS */
  	};
-@@ -406,7 +428,7 @@ ov5645_csi20: ov5645_csi20@3c {
+@@ -414,7 +436,7 @@ ov5645_csi20: ov5645_csi20@3c {
   		/* Set dummy enable gpio */
   		enable-gpios = <&gpio_dummy 0 GPIO_ACTIVE_HIGH>;
   		reset-gpios = <&pinctrl RZV2H_GPIO(6, 4) GPIO_ACTIVE_LOW>;
@@ -435,7 +435,7 @@ index bac4f8060..e0b8cb43f 100644
   		port {
   			ov5645_to_csi20: endpoint {
   				clock-lanes = <0>;
-@@ -434,7 +456,7 @@ ov5645_csi21: ov5645_csi21@3c {
+@@ -442,7 +464,7 @@ ov5645_csi21: ov5645_csi21@3c {
   		/* Set dummy enable gpio */
   		enable-gpios = <&gpio_dummy 1 GPIO_ACTIVE_HIGH>;
   		reset-gpios = <&pinctrl RZV2H_GPIO(6, 5) GPIO_ACTIVE_LOW>;
@@ -444,7 +444,7 @@ index bac4f8060..e0b8cb43f 100644
   		port {
   			ov5645_to_csi21: endpoint {
   				clock-lanes = <0>;
-@@ -461,7 +483,7 @@ ov5645_csi22: ov5645_csi22@3c {
+@@ -469,7 +491,7 @@ ov5645_csi22: ov5645_csi22@3c {
   		vddd-supply = <&ov5645_vddd_1v5>;
   		enable-gpios = <&pinctrl RZV2H_GPIO(6, 1) GPIO_ACTIVE_HIGH>;
   		reset-gpios = <&pinctrl RZV2H_GPIO(9, 2) GPIO_ACTIVE_LOW>;
@@ -453,7 +453,7 @@ index bac4f8060..e0b8cb43f 100644
   		port {
   			ov5645_to_csi22: endpoint {
   				clock-lanes = <0>;
-@@ -488,7 +510,7 @@ ov5645_csi23: ov5645_csi23@3c {
+@@ -496,7 +518,7 @@ ov5645_csi23: ov5645_csi23@3c {
   		vddd-supply = <&ov5645_vddd_1v5>;
   		enable-gpios = <&pinctrl RZV2H_GPIO(6, 0) GPIO_ACTIVE_HIGH>;
   		reset-gpios = <&pinctrl RZV2H_GPIO(9, 3) GPIO_ACTIVE_LOW>;
@@ -462,7 +462,7 @@ index bac4f8060..e0b8cb43f 100644
   		port {
   			ov5645_to_csi23: endpoint {
   				clock-lanes = <0>;
-@@ -621,6 +643,65 @@ partition@200000 {
+@@ -629,6 +651,65 @@ partition@200000 {
  	};
  };
  

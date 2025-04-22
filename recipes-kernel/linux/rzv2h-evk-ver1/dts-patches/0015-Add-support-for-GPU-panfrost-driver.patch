@@ -1,16 +1,16 @@
-From 070f38d3830bb3f55861ec3bd82e9dce0af50c5b Mon Sep 17 00:00:00 2001
+From b84c17f6b38d4d0a293bc8b5c212d16dac0e3d4d Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:43:33 +0000
-Subject: [PATCH 14/16] Add support for GPU panfrost driver
+Subject: [PATCH 15/19] Add support for GPU panfrost driver
 
 Upstream-Status: Pending
 ---
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    | 51 +++++++++++++++++++
- .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts | 30 +++++++++++
- 2 files changed, 81 insertions(+)
+ .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts | 29 +++++++++++
+ 2 files changed, 80 insertions(+)
 
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
-index 45ee8be38..80f93e30e 100644
+index 76901194d..bb6de96b1 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057.dtsi
 @@ -208,6 +208,35 @@ L3_CA55: cache-controller-0 {
@@ -79,7 +79,7 @@ index 45ee8be38..80f93e30e 100644
  			compatible = "renesas,rzv2h-eqos",
  					"snps,dwc-qos-ethernet-4.10";
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-index b98d2a4fd..c929398f7 100644
+index d4d1a55bd..153c2a08d 100644
 --- a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 @@ -86,6 +86,19 @@ drp_reserved: DRP-AI@240000000 {
@@ -102,7 +102,7 @@ index b98d2a4fd..c929398f7 100644
  	reg_1p8v: regulator0 {
  		compatible = "regulator-fixed";
  
-@@ -106,6 +119,17 @@ reg_3p3v: regulator1 {
+@@ -106,6 +119,16 @@ reg_3p3v: regulator1 {
  		regulator-always-on;
  	};
  
@@ -116,11 +116,10 @@ index b98d2a4fd..c929398f7 100644
 +		regulator-always-on;
 +	};
 +
-+
- 	vccq_sdhi0: regulator-vccq-sdhi0 {
- 		compatible = "regulator-gpio";
- 
-@@ -601,6 +625,12 @@ &ostm1 {
+ 	vmmc_sdhi0: regulator-vcc-sdhi0 {
+  		compatible = "regulator-fixed";
+  
+@@ -611,6 +634,12 @@ &ostm1 {
  	status = "okay";
  };
  

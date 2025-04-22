@@ -1,7 +1,7 @@
-From addb1543484851b4192153cd89f0f387ce8a9fdc Mon Sep 17 00:00:00 2001
+From dfbc1df66ccf78379e0af734876392f843d6f154 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 15 Apr 2025 03:03:45 +0000
-Subject: [PATCH 01/16] Initial support for rzv2h-evk board
+Subject: [PATCH 01/19] Initial support for rzv2h-evk board
 
 This patch support for RZV2H EVK Ver1 board on kernel 6.10.
 Support boot over SD card, xSPI or TFTP
@@ -15,7 +15,7 @@ Upstream-Status: Pending
  .../soc/renesas/renesas,rzg2l-sysc.yaml       |    5 +-
  arch/arm64/boot/dts/renesas/Makefile          |    2 +
  arch/arm64/boot/dts/renesas/r9a09g057.dtsi    |  310 +++
- .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts |  301 +++
+ .../boot/dts/renesas/r9a09g057h4-evk-ver1.dts |  309 +++
  arch/arm64/configs/defconfig                  | 1487 +--------------
  drivers/clk/renesas/Kconfig                   |    9 +
  drivers/clk/renesas/Makefile                  |    2 +
@@ -42,7 +42,7 @@ Upstream-Status: Pending
  .../pinctrl/renesas,r9a09g057-pinctrl.h       |   31 +
  include/dt-bindings/pinctrl/rzv2h-pinctrl.h   |   60 +
  include/linux/regulator/consumer.h            |    8 +
- 34 files changed, 4433 insertions(+), 1948 deletions(-)
+ 34 files changed, 4441 insertions(+), 1948 deletions(-)
  create mode 100644 Documentation/devicetree/bindings/clock/renesas,rzv2h-cpg.yaml
  create mode 100644 arch/arm64/boot/dts/renesas/r9a09g057.dtsi
  create mode 100644 arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
@@ -572,10 +572,10 @@ index 000000000..e036ef928
 \ No newline at end of file
 diff --git a/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
 new file mode 100644
-index 000000000..1a1acd85e
+index 000000000..ee2825d41
 --- /dev/null
 +++ b/arch/arm64/boot/dts/renesas/r9a09g057h4-evk-ver1.dts
-@@ -0,0 +1,301 @@
+@@ -0,0 +1,309 @@
 +// SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 +/*
 + * Device Tree Source for the RZ/V2H EVK ver1 board
@@ -684,6 +684,28 @@ index 000000000..1a1acd85e
 +		regulator-always-on;
 +	};
 +
++	vmmc_sdhi0: regulator-vcc-sdhi0 {
++ 		compatible = "regulator-fixed";
++ 
++ 		regulator-name = "SDHI0 Vmmc";
++ 		regulator-min-microvolt = <3300000>;
++ 		regulator-max-microvolt = <3300000>;
++ 
++ 		gpios = <&pinctrl RZV2H_GPIO(A, 1) GPIO_ACTIVE_HIGH>;
++ 		enable-active-high;
++ 	};
++ 
++ 	vmmc_sdhi1: regulator-vcc-sdhi1 {
++ 		compatible = "regulator-fixed";
++ 
++ 		regulator-name = "SDHI1 Vmmc";
++ 		regulator-min-microvolt = <3300000>;
++ 		regulator-max-microvolt = <3300000>;
++ 
++ 		gpios = <&pinctrl RZV2H_GPIO(A, 3) GPIO_ACTIVE_HIGH>;
++ 		enable-active-high;
++ 	};
++
 +	vccq_sdhi0: regulator-vccq-sdhi0 {
 +		compatible = "regulator-gpio";
 +
@@ -721,20 +743,6 @@ index 000000000..1a1acd85e
 +	scif_pins: scif {
 +		pins =  "SCIF_RXD", "SCIF_TXD";
 +		renesas,output-impedance = <1>;
-+	};
-+
-+	sd0_pwr_en {
-+		gpio-hog;
-+		gpios = <RZV2H_GPIO(A, 1) GPIO_ACTIVE_HIGH>;
-+		output-high;
-+		line-name = "sd0_pwr_en";
-+	};
-+
-+	sd1_pwr_en {
-+		gpio-hog;
-+		gpios = <RZV2H_GPIO(A, 3) GPIO_ACTIVE_HIGH>;
-+		output-high;
-+		line-name = "sd1_pwr_en";
 +	};
 +
 +	sdhi0_pins: sd0 {
@@ -802,7 +810,7 @@ index 000000000..1a1acd85e
 +&sdhi0 {
 +	pinctrl-0 = <&sdhi0_pins>;
 +	pinctrl-names = "default";
-+	vmmc-supply = <&reg_3p3v>;
++	vmmc-supply = <&vmmc_sdhi0>;
 +	vqmmc-supply = <&vccq_sdhi0>;
 +	bus-width = <4>;
 +	sd-uhs-sdr50;
@@ -814,7 +822,7 @@ index 000000000..1a1acd85e
 +	pinctrl-0 = <&sdhi1_pins>;
 +	pinctrl-1 = <&sdhi1_pins>;
 +	pinctrl-names = "default","state_uhs";
-+	vmmc-supply = <&reg_3p3v>;
++	vmmc-supply = <&vmmc_sdhi1>;
 +	vqmmc-supply = <&vqmmc_sdhi1>;
 +	bus-width = <4>;
 +	sd-uhs-sdr50;
