@@ -7,6 +7,8 @@ BBFILES ?= ""
 
 QT_LAYER = "${@os.path.isdir("##OEROOT##/../meta-qt5")}"
 RZ_FEATURE_CODEC = "${@os.path.isdir("##OEROOT##/../meta-rz-features/meta-rz-codecs")}"
+RZ_FEATURE_OPENCVA = "${@os.path.isdir("##OEROOT##/../meta-rz-features/meta-rz-opencva")}"
+RZ_FEATURE_DRPAI = "${@os.path.isdir("##OEROOT##/../meta-rz-features/meta-rz-drpai")}"
 
 BBLAYERS ?= " \
   ##OEROOT##/meta \
@@ -19,4 +21,6 @@ BBLAYERS ?= " \
   ##OEROOT##/../meta-openembedded/meta-networking \
   ${@'##OEROOT##/../meta-qt5' if '${QT_LAYER}' == 'True' else ''} \
   ${@'##OEROOT##/../meta-rz-features/meta-rz-codecs' if '${RZ_FEATURE_CODEC}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-rz-features/meta-rz-opencva' if '${RZ_FEATURE_OPENCVA}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-rz-features/meta-rz-drpai' if '${RZ_FEATURE_DRPAI}' == 'True' else ''} \
   "
