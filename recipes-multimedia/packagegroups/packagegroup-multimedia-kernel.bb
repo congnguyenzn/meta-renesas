@@ -19,5 +19,9 @@ RDEPENDS:packagegroup-multimedia-kernel-modules = " \
     kernel-module-mmngrbuf \
     kernel-module-vspm \
     kernel-module-vspmif \
+    kernel-module-mmngr-dev \
+    kernel-module-mmngrbuf-dev \
+    kernel-module-vspm-dev \
+    kernel-module-vspmif-dev \
 "
 

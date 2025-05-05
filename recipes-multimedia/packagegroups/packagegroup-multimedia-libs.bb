@@ -15,6 +15,10 @@ PACKAGES = " \
 "
 
 RDEPENDS:packagegroup-multimedia-libs = " \
-    mmngr-user-module mmngrbuf-user-module \
+    mmngr-user-module \
+    mmngrbuf-user-module \
     vspmif-user-module \
+    mmngr-user-module-dev \
+    mmngrbuf-user-module-dev \
+    vspmif-user-module-dev \
 "
