@@ -33,6 +33,7 @@ SRC_URI:append = " \
         file://0011-Fix-error-cannot-detect-NOOUT-in-case-rs_par-NULL.patch \
         file://0012-vspm_main-Update-isu-clock-enable.patch \
         file://0013-vspm-isu-Check-addr-of-1st-plane-in-parameter-for-RP.patch \
+        file://0014-ISU-remove-csc-mode-in-struct-isu_csc_t.patch \
         file://0014-rzg2l-sbc-get-interrupt-number.patch \
         file://0015-rzg2l-sbc-vspm-supports-kernel-6.10.patch \
 "
@@ -59,6 +60,9 @@ do_install () {
     # Install shared library to KERNELSRC(STAGING_KERNEL_DIR) for reference from other modules
     # This file installed in SDK by kernel-devsrc pkg.
     install -m 644 ${B}/Module.symvers ${KERNELSRC}/include/vspm.symvers
+
+    # Replace absolute paths in vspm.symvers with a generic path
+    sed -i "s|${WORKDIR}|/usr/src/linux|g" ${KERNELSRC}/include/vspm.symvers
 
     # Install kernel module
     install -m 644 ${B}/vspm.ko ${D}/usr/lib/modules/${KERNEL_VERSION}/extra/
