@@ -52,8 +52,9 @@ DEPENDS += " linux-yocto uenv firmware-pack"
 
 add_bootloader_rootfs() {
     cp -rf ${DEPLOY_DIR_IMAGE}/target/images/bl2_bp_spi-${MACHINE}.bin ${IMAGE_ROOTFS}/boot
+    cp -rf ${DEPLOY_DIR_IMAGE}/target/images/bl2_bp_esd-${MACHINE}.bin ${IMAGE_ROOTFS}/boot
     cp -rf ${DEPLOY_DIR_IMAGE}/target/images/fip-${MACHINE}.bin ${IMAGE_ROOTFS}/boot
-}
+}	
 
 # Clean the output directory after the build
 do_release_clean() {   
