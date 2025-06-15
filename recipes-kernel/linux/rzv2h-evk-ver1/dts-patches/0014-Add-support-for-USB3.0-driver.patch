@@ -1,4 +1,4 @@
-From 1b571eb8e4849612e072293a93dda8acd1329a1c Mon Sep 17 00:00:00 2001
+From 1757333d8ac4af4eca58f92f59e0dfa0b9657b10 Mon Sep 17 00:00:00 2001
 From: Cong Nguyen <cong.nguyen.zn@renesas.com>
 Date: Tue, 22 Apr 2025 07:01:57 +0000
 Subject: [PATCH 14/19] Add support for USB3.0 driver
@@ -16,9 +16,9 @@ Signed-off-by: Cong Nguyen <cong.nguyen.zn@renesas.com>
  drivers/usb/host/Kconfig                      |   9 +
  drivers/usb/host/Makefile                     |   1 +
  drivers/usb/host/xhci-rcar.c                  |  10 +
- drivers/usb/host/xhci-rzv2h.c                 | 164 +++++++++++++++
+ drivers/usb/host/xhci-rzv2h.c                 | 178 +++++++++++++++++
  drivers/usb/host/xhci-rzv2h.h                 |  22 ++
- 11 files changed, 481 insertions(+), 2 deletions(-)
+ 11 files changed, 495 insertions(+), 2 deletions(-)
  create mode 100644 drivers/phy/renesas/phy-rz-usb3.c
  create mode 100644 drivers/usb/host/xhci-rzv2h.c
  create mode 100644 drivers/usb/host/xhci-rzv2h.h
@@ -443,10 +443,10 @@ index 8b3576477..068ff125b 100644
  };
 diff --git a/drivers/usb/host/xhci-rzv2h.c b/drivers/usb/host/xhci-rzv2h.c
 new file mode 100644
-index 000000000..cc9e3bdd2
+index 000000000..d554c66d8
 --- /dev/null
 +++ b/drivers/usb/host/xhci-rzv2h.c
-@@ -0,0 +1,164 @@
+@@ -0,0 +1,178 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * xHCI host controller driver for R-Car SoCs
@@ -470,6 +470,13 @@ index 000000000..cc9e3bdd2
 +#define USB3_HOST_INTEN_HSE			BIT(2)
 +#define USB3_HOST_INTEN_ENA			(USB3_HOST_INTEN_XHC \
 +                        | USB3_HOST_INTEN_HSE)
++
++/* PIPE Status and Control Register */
++#define USB3_HOST_U3P0PIPESC0			0x10C0
++#define USB3_HOST_U3P0PIPESC1			0x10C4
++#define USB3_HOST_U3P0PIPESC2			0x10C8
++#define USB3_HOST_U3P0PIPESC3			0x10CC
++#define USB3_HOST_U3P0PIPESC4			0x10D0
 +
 +/* USB3TEST Registers */
 +#define USB3TEST_CREGCTRL			0x1010
@@ -599,6 +606,13 @@ index 000000000..cc9e3bdd2
 +    u32 int_en;
 +
 +    if (hcd->regs) {
++        /* Update the controller initial setting */
++		writel(0x03130200, hcd->regs + USB3_HOST_U3P0PIPESC0);
++		writel(0x00160200, hcd->regs + USB3_HOST_U3P0PIPESC1);
++		writel(0x03150000, hcd->regs + USB3_HOST_U3P0PIPESC2);
++		writel(0x03130200, hcd->regs + USB3_HOST_U3P0PIPESC3);
++		writel(0x00180000, hcd->regs + USB3_HOST_U3P0PIPESC4);
++
 +        /* Interrupt Enable */
 +        int_en = readl(hcd->regs + USB3_HOST_INTEN);
 +        int_en |= USB3_HOST_INTEN_ENA;

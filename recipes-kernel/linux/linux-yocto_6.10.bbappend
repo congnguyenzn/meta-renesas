@@ -33,6 +33,7 @@ SRC_URI:append:rzv2h-evk-ver1 = "\
 SRC_URI:append:rzv2h-evk-ver1 = "\
                     file://touch.cfg \
                     file://panfrost.cfg \
+                    file://dexhand.cfg \
                 "
 
 KCONFIG_MODE:rzv2h-evk-ver1 = "alldefconfig"
