@@ -14,6 +14,7 @@ FILESEXTRAPATHS:prepend := "${THISDIR}:"
 # Apply patches for RZV2H EVK ver1 board
 SRC_URI:append:rzv2h-evk-ver1 = "\
     file://dts-patches/0001-rzg2l-sbc-Bring-compat_alloc_user_space-back.patch \
+    file://dts-patches/0001-drivers-usb-host-xhci-Update-USB3-PHY-initial-settin.patch \
 "
 
 SRC_URI:append:rzv2h-evk-ver1 = "\

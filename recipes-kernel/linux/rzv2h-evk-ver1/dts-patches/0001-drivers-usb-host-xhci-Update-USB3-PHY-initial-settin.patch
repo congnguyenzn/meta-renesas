@@ -1,0 +1,47 @@
+From 47e61dd82ec392b3e12e2e00c9c0577df15086cb Mon Sep 17 00:00:00 2001
+From: Cong Nguyen <cong.nguyen.zn@renesas.com>
+Date: Sat, 21 Jun 2025 15:50:43 +0000
+Subject: [PATCH] drivers: usb: host: xhci: Update USB3/PHY initial setting
+
+Upstream-Status: Pending
+
+Signed-off-by: Cong Nguyen <cong.nguyen.zn@renesas.com>
+---
+ drivers/usb/host/xhci-rzv2h.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/drivers/usb/host/xhci-rzv2h.c b/drivers/usb/host/xhci-rzv2h.c
+index 95aac4c3a..f1cfa88f8 100644
+--- a/drivers/usb/host/xhci-rzv2h.c
++++ b/drivers/usb/host/xhci-rzv2h.c
+@@ -22,6 +22,13 @@
+ #define USB3_HOST_INTEN_ENA			(USB3_HOST_INTEN_XHC \
+ 						| USB3_HOST_INTEN_HSE)
+ 
++/* PIPE Status and Control Register */
++#define USB3_HOST_U3P0PIPESC0			0x10C0
++#define USB3_HOST_U3P0PIPESC1			0x10C4
++#define USB3_HOST_U3P0PIPESC2			0x10C8
++#define USB3_HOST_U3P0PIPESC3			0x10CC
++#define USB3_HOST_U3P0PIPESC4			0x10D0
++
+ /* USB3TEST Registers */
+ #define USB3TEST_CREGCTRL			0x1010
+ #define USB3TEST_CREGCTRL_ENTRY			BIT(0)
+@@ -150,6 +157,13 @@ void xhci_rzv2h_start(struct usb_hcd *hcd)
+ 	u32 int_en;
+ 
+ 	if (hcd->regs) {
++		/* Update the controller initial setting */
++		writel(0x03130200, hcd->regs + USB3_HOST_U3P0PIPESC0);
++		writel(0x00160200, hcd->regs + USB3_HOST_U3P0PIPESC1);
++		writel(0x03150000, hcd->regs + USB3_HOST_U3P0PIPESC2);
++		writel(0x03130200, hcd->regs + USB3_HOST_U3P0PIPESC3);
++		writel(0x00180000, hcd->regs + USB3_HOST_U3P0PIPESC4);
++
+ 		/* Interrupt Enable */
+ 		int_en = readl(hcd->regs + USB3_HOST_INTEN);
+ 		int_en |= USB3_HOST_INTEN_ENA;
+-- 
+2.43.0
+
