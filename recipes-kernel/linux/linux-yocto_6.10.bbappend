@@ -25,7 +25,7 @@ SRC_URI:append:rzv2h-evk-ver1 = "\
 
 KCONFIG_MODE:rzv2h-evk-ver1 = "alldefconfig"
 
-KBUILD_DEFCONFIG:rzv2h-evk-ver1 ?= "rzv2h_defconfig"
+KBUILD_DEFCONFIG:rzv2h-evk-ver1 ?= "renesas_defconfig"
 
 # Supported device tree and device tree overlays
 KERNEL_DEVICETREE:rzv2h-evk-ver1 = "renesas/r9a09g057h4-evk-ver1.dtb"
