@@ -7,7 +7,8 @@ inherit kernel
 inherit kernel-devicetree
 
 KBRANCH:rzv2h-evk-ver1  = "styhead/rz-cmn"
-SRC_URI:rzv2h-evk-ver1 = "git://github.com/Renesas-SST/linux-rz.git;name=machine;branch=${KBRANCH};protocol=https"
+SRC_URI:rzv2h-evk-ver1 = "git://github.com/Renesas-SST/linux-rz.git;name=machine;branch=${KBRANCH};protocol=http \
+                          git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-6.10;destsuffix=${KMETA};protocol=https"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}:"
 
@@ -18,9 +19,8 @@ SRC_URI:append:rzv2h-evk-ver1 = "\
 "
 
 SRC_URI:append:rzv2h-evk-ver1 = "\
-                    file://touch.cfg \
+                    file://common.cfg \
                     file://panfrost.cfg \
-                    file://dexhand.cfg \
                 "
 
 KCONFIG_MODE:rzv2h-evk-ver1 = "alldefconfig"
