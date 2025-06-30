@@ -13,7 +13,7 @@ RZ_FEATURE_SDK_ROS_JAZZY = "${@'True' if all(os.path.isdir(os.path.join("##OEROO
     'meta-rz-features-ros/meta-rzv2h-ros-jazzy', \
     'meta-ros/meta-ros-common', \
     'meta-ros/meta-ros2', \
-    'meta-ros/meta-ros2-jazzy' \
+    'meta-ros/meta-ros2-jazzy', \
     'meta-clang' \
 ]) else 'False'}"
 
