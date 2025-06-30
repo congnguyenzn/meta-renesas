@@ -298,6 +298,10 @@ KERNEL_DANGLING_FEATURES_WARN_ONLY = "1"
 DISTRO_FEATURES:append = " systemd usrmerge pam"
 VIRTUAL-RUNTIME_init_manager = "systemd"
 
+# Add the static lib to SDK toolchain
+SDKIMAGE_FEATURES:append = " staticdev-pkgs dev-pkgs dbg-pkgs"
+IMAGE_INSTALL:append = " kernel-devsrc"
+
 PREFERRED_RPROVIDER_wpa-supplicant = "summit-supplicant-lwb"
 PREFERRED_RPROVIDER_wpa-supplicant-cli = "summit-supplicant-lwb"
 PREFERRED_RPROVIDER_wpa-supplicant-passphrase = "summit-supplicant-lwb"
@@ -307,4 +311,13 @@ PREFERRED_RPROVIDER_wireless-regdb-static = "wireless-regdb"
 LICENSE_FLAGS_ACCEPTED:append = " commercial"
 
 # Disable generating JSON SPDX for images
-# INHERIT:remove = "create-spdx"
+INHERIT:remove = "create-spdx"
+
+# Configures BitBake's task scheduling based on host resource pressure (CPU, Mem, I/O).
+# Utilizes Linux PSI (/proc/pressure). Values are internal pressure units; higher
+# values allow more pressure before throttling.
+# Recommended default is "15000" for balanced performance/stability.
+# Adjust as needed for your specific build host and workload.
+BB_PRESSURE_MAX_MEMORY = "100000"
+#BB_PRESSURE_MAX_CPU = "15000"
+#BB_PRESSURE_MAX_IO = "15000"
