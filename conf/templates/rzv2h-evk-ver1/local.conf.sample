@@ -313,6 +313,14 @@ LICENSE_FLAGS_ACCEPTED:append = " commercial"
 # Disable generating JSON SPDX for images
 INHERIT:remove = "create-spdx"
 
+# Enable for build ROS packages
+PREFERRED_PROVIDER_llvm = "clang"
+PREFERRED_PROVIDER_llvm-native = "clang-native"
+PREFERRED_PROVIDER_nativesdk-llvm = "nativesdk-clang"
+PROVIDES:pn-clang = "llvm"
+PROVIDES:pn-clang-native = "llvm-native"
+PROVIDES:pn-nativesdk-clang = "nativesdk-llvm"
+
 # Configures BitBake's task scheduling based on host resource pressure (CPU, Mem, I/O).
 # Utilizes Linux PSI (/proc/pressure). Values are internal pressure units; higher
 # values allow more pressure before throttling.
