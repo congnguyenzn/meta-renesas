@@ -57,6 +57,7 @@ SRC_URI:append:rz-cmn = "\
 	file://rzg2l-sbc/0010-rz-sbc-rename-rzpi-to-rzg2l-sbc-across-all-files-10.patch \
 	file://rzg2l-sbc/0011-rzg2l-sbc-Prevent-disable-eth0-before-eth1.patch \
 	file://rzv2h-evk/0001-rzv2h-evk-Support-RZV2H-EVK.patch \
+	file://rzv2h-rdk/0001-rz-cmn-Add-device-tree-for-RZV2H-RDK.patch \
 	file://common/0001-arm64-dts-renesas-enable-hardware-video-codec.patch \
 	file://common/0002-arm64-dts-renesas-enable-OV5645-MIPI-CSI-Camera.patch \
 	file://common/0003-linux-yocto-update-kernel-to-support-multiple-featur.patch \
@@ -72,7 +73,13 @@ KMACHINE:rz-cmn ?= "renesas_defconfig"
 #KBUILD_DEFCONFIG:rz-cmn ?= "defconfig"
 
 # List of device tree names for rz-cmn
-DEVICETREE_NAME:rz-cmn = "rzg2l-sbc r9a07g044l2-smarc r9a07g044l2-smarc-cru-csi-ov5645 r9a07g054l2-smarc r9a07g054l2-smarc-cru-csi-ov5645 r9a09g057h4-evk-ver1"
+DEVICETREE_NAME:rz-cmn = "rzg2l-sbc \
+						  r9a07g044l2-smarc \
+						  r9a07g044l2-smarc-cru-csi-ov5645 \
+						  r9a07g054l2-smarc \
+						  r9a07g054l2-smarc-cru-csi-ov5645 \
+						  r9a09g057h4-evk-ver1 \
+						  r9a09g057h4-rdk-ver1"
 
 # Supported device tree and device tree overlays
 KERNEL_DEVICETREE:rz-cmn = "${@' '.join(['renesas/%s.dtb' % devicetree_name for devicetree_name in d.getVar('DEVICETREE_NAME').split()])}"

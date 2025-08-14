@@ -14,7 +14,7 @@ S = "${WORKDIR}/sources"
 # Create bin file and convert to srec file
 do_compile () {
     for target in ${SUPPORT_TARGETS}; do
-        if [ ${target} = "rzv2h-evk" ]; then
+        if [ ${target} = "rzv2h-evk" ] || [ ${target} = "rzv2h-rdk" ]; then
             # Create bl2_bp.bin esd
             bptool ${RECIPE_SYSROOT}/boot/bl2-${target}.bin bp.bin 0x08103000 esd
             cat bp.bin ${RECIPE_SYSROOT}/boot/bl2-${target}.bin > bl2_bp_esd_${target}.bin

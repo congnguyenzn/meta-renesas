@@ -26,7 +26,7 @@ UNPACKDIR = "${S}"
 
 do_prepare_src() {
 	for target in ${SUPPORT_TARGETS}; do
-		if [ ${target} = "rzv2h-evk" ]; then
+		if [ ${target} = "rzv2h-evk" ] || [ ${target} = "rzv2h-rdk" ]; then
 			continue;
 		fi
 		mkdir -p ${B}/${target}
@@ -37,7 +37,7 @@ do_prepare_src() {
 do_compile() {
 	for target in ${SUPPORT_TARGETS}; do
 		PMIC_BUILD_DIR="${B}/${target}/build_pmic"
-		if [ ${target} = "rzv2h-evk" ]; then
+		if [ ${target} = "rzv2h-evk" ] || [ ${target} = "rzv2h-rdk" ]; then
 			continue;
 		elif [ ${target} = "rzg2l-sbc" ]; then
 			BOARD="RZG2L_SBC"
@@ -65,7 +65,7 @@ do_install[noexec] = "1"
 do_deploy() {
 	install -d ${DEPLOYDIR}/target/images
 	for target in ${SUPPORT_TARGETS}; do
-		if [ ${target} = "rzv2h-evk" ]; then
+		if [ ${target} = "rzv2h-evk" ] || [ ${target} = "rzv2h-rdk" ]; then
 			continue;
 		fi
 		PMIC_BUILD_DIR="${B}/${target}/build_pmic"

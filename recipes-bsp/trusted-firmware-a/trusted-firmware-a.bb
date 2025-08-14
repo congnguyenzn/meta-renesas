@@ -72,6 +72,8 @@ do_compile() {
             BUILD_FLAGS="PLAT=v2l BOARD=smarc_rzv2l"
         elif [ ${target} = "rzv2h-evk" ]; then
             BUILD_FLAGS="PLAT=v2h BOARD=v2h_evk_1 ENABLE_STACK_PROTECTOR=default"
+        elif [ ${target} = "rzv2h-rdk" ]; then
+            BUILD_FLAGS="PLAT=v2h BOARD=v2h_evk_1 ENABLE_STACK_PROTECTOR=default"
         fi
         make ${BUILD_FLAGS} bl2_with_dtb bl31
     done
@@ -85,7 +87,7 @@ do_install() {
             PLATFORM="g2l"
         elif [ ${target} = "rzv2l-evk" ]; then
             PLATFORM="v2l"
-        elif [ ${target} = "rzv2h-evk" ]; then
+        elif [ ${target} = "rzv2h-evk" ] || [ ${target} = "rzv2h-rdk" ]; then
             PLATFORM="v2h"
         fi
         install -m 644 ${B}/${target}/build/${PLATFORM}/release/bl2.bin ${D}/boot/bl2-${target}.bin
@@ -103,7 +105,7 @@ do_deploy() {
             PLATFORM="g2l"
         elif [ ${target} = "rzv2l-evk" ]; then
             PLATFORM="v2l"
-        elif [ ${target} = "rzv2h-evk" ]; then
+        elif [ ${target} = "rzv2h-evk" ] || [ ${target} = "rzv2h-rdk" ]; then
             PLATFORM="v2h"
         fi
         # Copy IPL to deploy folder
