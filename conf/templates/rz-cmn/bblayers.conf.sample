@@ -15,6 +15,16 @@ QT6_LAYER = "${@'True' if d.getVar('QT6_SUPPORT') == '1' else 'False'}"
 QT5_LAYER = "${@'True' if d.getVar('QT6_SUPPORT') == '0' else 'False'}"
 
 RZ_FEATURE_CODEC = "${@os.path.isdir("##OEROOT##/../meta-rz-features/meta-rz-codecs")}"
+RZ_FEATURE_OPENCVA = "${@os.path.isdir("##OEROOT##/../meta-rz-features/meta-rz-opencva")}"
+RZ_FEATURE_DRPAI = "${@os.path.isdir("##OEROOT##/../meta-rz-features/meta-rz-drpai")}"
+
+RZ_FEATURE_SDK_ROS_JAZZY = "${@'True' if all(os.path.isdir(os.path.join('##OEROOT##/../', p)) for p in [ \
+  'meta-rz-features-ros/meta-rzv2h-ros-jazzy', \
+  'meta-ros/meta-ros-common', \
+  'meta-ros/meta-ros2', \
+  'meta-ros/meta-ros2-jazzy', \
+  'meta-clang' \
+]) else 'False'}"
 
 BBLAYERS ?= " \
   ##OEROOT##/meta \
@@ -29,4 +39,11 @@ BBLAYERS ?= " \
   ${@'##OEROOT##/../meta-qt5' if '${QT5_LAYER}' == 'True' else ''} \
   ${@'##OEROOT##/../meta-qt6' if '${QT6_LAYER}' == 'True' else ''} \
   ${@'##OEROOT##/../meta-rz-features/meta-rz-codecs' if '${RZ_FEATURE_CODEC}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-rz-features/meta-rz-opencva' if '${RZ_FEATURE_OPENCVA}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-rz-features/meta-rz-drpai' if '${RZ_FEATURE_DRPAI}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-rz-features-ros/meta-rzv2h-ros-jazzy' if '${RZ_FEATURE_SDK_ROS_JAZZY}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-ros/meta-ros-common' if '${RZ_FEATURE_SDK_ROS_JAZZY}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-ros/meta-ros2' if '${RZ_FEATURE_SDK_ROS_JAZZY}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-ros/meta-ros2-jazzy' if '${RZ_FEATURE_SDK_ROS_JAZZY}' == 'True' else ''} \
+  ${@'##OEROOT##/../meta-clang' if '${RZ_FEATURE_SDK_ROS_JAZZY}' == 'True' else ''} \
   "
